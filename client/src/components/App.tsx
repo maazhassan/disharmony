@@ -5,7 +5,7 @@ function App() {
 
   return (
     <>
-      <p className="text-red-600 bg-black">
+      <p className="text-red-600 bg-blue-500">
         Hello world!
       </p>
       <button onClick={() => setCount((count) => count + 1)}>
