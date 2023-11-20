@@ -6,6 +6,18 @@ export default {
   ],
   theme: {
     extend: {
+      height: {
+        '45rem': '45rem',
+        'inputh': '2.5rem',
+      },
+      width: {
+        '33.5rem': '33.5rem',
+        'inputm': '2.75rem',
+        'inputw': '17.5rem',
+      },
+      spacing: {
+        't-indent': '0.74rem',
+      },
       colors: {
         "bg-color": "var(--bg-color: #4C4254)",
         "app-orang": "var(--app-orange: #ED7B82)",

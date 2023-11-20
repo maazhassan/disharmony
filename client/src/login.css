@@ -1,0 +1,74 @@
+:root {
+    --bg-color: #4C4254;
+    --app-orange: #ED7B82;
+    --modal-color: #635971;
+    --ban-btn: #C73F47;
+    --bg-color: #4c4254;
+    --pink: #ed7b82;
+}
+
+
+
+.login-modal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 45rem;
+    width: 33.5rem;
+    background-color: var(--modal-color);
+    border-radius: 0.5rem;
+}
+
+body {
+    background-color: var(--bg-color);
+}
+
+.login-conatiner {
+    height: 100%;
+    background-color: var(--bg-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-modal input {
+    margin: 2.75rem 0rem;
+    text-indent: 0.75rem;
+    border-radius: 0.25rem;
+    width: 17.5rem;
+    height: 2.5rem;
+    border: none;
+}
+
+.login-modal button {
+    padding: 0.55rem 2rem;
+    margin: 1rem 0rem;
+    background-color: var(--pink);
+    color: white;
+    border: none;
+}
+
+.login-modal button:hover {
+    cursor: pointer;
+}
+
+.login-modal h2 {
+    color: white;
+    font-size: 1.45rem;
+}
+
+.make-acc-link {
+    color: white;
+    margin: 6.5rem 0rem;
+}
+
+.make-acc-link span {
+    text-decoration: underline;
+    color: var(--pink);
+}
+
+.make-acc-link span:hover {
+    cursor: pointer;
+    color: #C73F47;
+}
