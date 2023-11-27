@@ -1,4 +1,4 @@
-import Register from './Register';
+import Register from './Login';
 import Main from './Main';
 import { useState } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
