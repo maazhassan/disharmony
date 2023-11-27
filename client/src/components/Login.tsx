@@ -1,14 +1,11 @@
 import { useState } from 'react';
+import { useAppData } from './App';
 
-type LoginProps = {
-  handleClickLogin: (u: string, p: string) => void,
-  connectionStatus: string,
-}
-
-
-const Login = ({ handleClickLogin, connectionStatus }: LoginProps) => {
+const Login = () => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+
+  const { handleClickLogin, connectionStatus } = useAppData();
 
   return (
     <div className="flex justify-center">
