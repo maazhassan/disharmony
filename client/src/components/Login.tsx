@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
-type RegisterProps = {
+type LoginProps = {
   handleClickLogin: (u: string, p: string) => void,
   connectionStatus: string,
 }
 
 
-const Register = ({ handleClickLogin, connectionStatus }: RegisterProps) => {
+const Login = ({ handleClickLogin, connectionStatus }: LoginProps) => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
 
@@ -38,13 +38,13 @@ const Register = ({ handleClickLogin, connectionStatus }: RegisterProps) => {
         </button>
         <div className="text-white mt-24">
           Don't have an account?&nbsp;
-          <span className="text-app-pink underline hover:cursor-pointer hover:text-app-pink">
+          <a href="/create" className="text-app-pink underline hover:cursor-pointer hover:text-app-pink">
             Click here!
-          </span>
+          </a>
         </div>
       </div>
     </div>
   );
 }
 
-export default Register;
+export default Login;
