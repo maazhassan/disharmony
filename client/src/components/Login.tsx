@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 type RegisterProps = {
   handleClickLogin: (u: string, p: string) => void,
