@@ -34,19 +34,19 @@ const App = () => {
     [ReadyState.UNINSTANTIATED]: "Uninstantiated",
   }[readyState];
 
-  const handleClickRegister = (n: string) => {
-    sendJsonMessage({name: n});
-    setName(n);
+  const handleClickLogin = (u: string, p: string) => {
+    sendJsonMessage({username: u, password: p});
+    setName(u);
   }
 
+
   return (
-    <div className="ml-2 mt-4">
+    <div className={`h-screen ${userID < 0 ? "bg-bg-color" : "bg-white"}`}>
     {
       userID < 0 ? (
         <Register
-          handleClickRegister={n => handleClickRegister(n)}
+          handleClickLogin={(u, p) => handleClickLogin(u, p)}
           connectionStatus={connectionStatus}
-          duplicate={userID === -2}
         />
       ) : (
         <Main
