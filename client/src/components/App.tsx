@@ -1,7 +1,9 @@
-import Register from './Login';
+import Login from './Login';
 import Main from './Main';
 import { useState } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
+import { createBrowserRouter, RouterProvider, redirect } from 'react-router-dom';
+import CreateAccount from './CreateAccount';
 
 const App = () => {
   const [userID, setUserID] = useState(-1);
@@ -39,21 +41,37 @@ const App = () => {
     setName(u);
   }
 
+  const appRouter = createBrowserRouter([
+    {
+      path: "/",
+      loader: async () => {
+        if (userID == -1) return redirect("/login")
+        else return redirect("/main");
+      },
+    },
+    {
+      path: "/login",
+      element: 
+        <Login 
+          handleClickLogin={(u, p) => handleClickLogin(u, p)}
+          connectionStatus={connectionStatus}
+        />,
+    },
+    {
+      path: "/create",
+      element: 
+        <CreateAccount />,
+    },
+    {
+      path: "/main",
+      element:
+        <Main name={name} />
+    },
+  ]);
 
   return (
     <div className={`h-screen ${userID < 0 ? "bg-bg-color" : "bg-white"}`}>
-    {
-      userID < 0 ? (
-        <Register
-          handleClickLogin={(u, p) => handleClickLogin(u, p)}
-          connectionStatus={connectionStatus}
-        />
-      ) : (
-        <Main
-          name={name}
-        />
-      )
-    }
+      <RouterProvider router={appRouter} />
     </div>
   );
 }
