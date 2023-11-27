@@ -1,11 +1,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-    --bg-color: #4C4254;
-    --app-orange: #ED7B82;
-    --modal-color: #635971;
-    --ban-btn: #C73F47;
-    --pink: #ed7b82;
-}
