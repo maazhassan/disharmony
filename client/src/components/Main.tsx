@@ -2,15 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { useWebSocket } from "react-use-websocket/dist/lib/use-websocket";
 import MessageWindow from "./messagewindow/MessageWindow";
 import UserList from "./UserList";
+import { useAppData } from "./App";
 
-type MainProps = {
-  name: string
-}
-
-const Main = ({ name }: MainProps) => {
+const Main = () => {
   const [users, setUsers] = useState([""]);
   const [selected, setSelected] = useState("");
   const readyRef = useRef(false);
+
+  const { name } = useAppData();
 
   useEffect(() => {
     if (readyRef.current) return;

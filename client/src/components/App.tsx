@@ -1,13 +1,33 @@
-import Login from './Login';
-import Main from './Main';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
-import { createBrowserRouter, RouterProvider, redirect } from 'react-router-dom';
-import CreateAccount from './CreateAccount';
+import { 
+  useNavigate,
+  Outlet,
+  useOutletContext,
+  useLocation
+} from 'react-router-dom';
+
+type ContextType = {
+  userID: number,
+  name: string,
+  connectionStatus: string
+  handleClickLogin: (u: string, p: string) => void,
+  handleClickCreate: (u: string, p: string) => void
+}
 
 const App = () => {
   const [userID, setUserID] = useState(-1);
   const [name, setName] = useState("");
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === "/") {
+      if (userID < 0) navigate("/login");
+      else navigate("/main");
+    }
+  }, [userID, location, navigate])
 
   const { sendJsonMessage, readyState } = useWebSocket(import.meta.env.VITE_WS_URL, {
     share: true,
@@ -41,39 +61,27 @@ const App = () => {
     setName(u);
   }
 
-  const appRouter = createBrowserRouter([
-    {
-      path: "/",
-      loader: async () => {
-        if (userID == -1) return redirect("/login")
-        else return redirect("/main");
-      },
-    },
-    {
-      path: "/login",
-      element: 
-        <Login 
-          handleClickLogin={(u, p) => handleClickLogin(u, p)}
-          connectionStatus={connectionStatus}
-        />,
-    },
-    {
-      path: "/create",
-      element: 
-        <CreateAccount />,
-    },
-    {
-      path: "/main",
-      element:
-        <Main name={name} />
-    },
-  ]);
+  const handleClickCreate = (u: string, p: string) => {
+    sendJsonMessage({username: u, password: p});
+    setName(u);
+  }
 
   return (
     <div className={`h-screen ${userID < 0 ? "bg-bg-color" : "bg-white"}`}>
-      <RouterProvider router={appRouter} />
+      <Outlet context={{
+        userID: userID,
+        name: name,
+        connectionStatus: connectionStatus,
+        handleClickLogin: (u: string, p: string) => handleClickLogin(u, p),
+        handleClickCreate: (u: string, p: string) => handleClickCreate(u, p)
+      } satisfies ContextType} />
     </div>
   );
+
+}
+
+export function useAppData() {
+  return useOutletContext<ContextType>();
 }
 
 export default App;
