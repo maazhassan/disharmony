@@ -26,7 +26,7 @@ const MessageDisplay = ({ name, selected }: MessageDisplayProps) => {
         setMessageHistory(
           [
             ...messageHistory,
-            { from: event.from, to: event.to, message: event.message, timestamp: "placeholder" }
+            { from: event.from, to: event.to, message: event.message }
           ]
         );
       }

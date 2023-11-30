@@ -6,15 +6,25 @@ export type LoginRequest = [
   }
 ];
 
+export type User = {
+  username: string,
+  online: boolean
+}
+
 export type LoginResponse = [
   "login_res",
   {
     user_type: string,
     direct_messages: DirectMessage[],
-    channel_messages: ChannelMessage[],
     blocked_users: string[],
     friends: string[],
-    friend_requests: string[]
+    friend_requests: string[],
+    users: User[],
+    channels: {
+      name: string,
+      users: User[],
+      messages: ChannelMessage[]
+    }
   }
 ];
 
@@ -26,19 +36,14 @@ export type RegisterRequest = [
   }
 ];
 
-export type DirectMessage = {
+export type MessageBase = {
   from: string,
-  to: string,
-  message: string,
-  timestamp: string
-};
-
-export type ChannelMessage = {
-  from: string,
-  channel: string,
-  message: string,
-  timestamp: string
+  message: string
 }
+
+export type DirectMessage = MessageBase & {to: string}
+
+export type ChannelMessage = MessageBase & {channel: string}
 
 export type DirectMessageRequest = [
   "direct_message_req",
@@ -48,6 +53,13 @@ export type DirectMessageRequest = [
 export type ChannelMessageRequest = [
   "channel_message_req",
   ChannelMessage
+];
+
+export type CreateChannelRequest = [
+  "create_channel_req",
+  {
+    name: string
+  }
 ];
 
 export type FriendRequest = [
@@ -65,7 +77,15 @@ export type FriendRequestResponse = [
     to: string,
     accepted: boolean
   }
-]
+];
+
+export type KickRequest = [
+  "kick_req",
+  {
+    user: string,
+    channel:string
+  }
+];
 
 export type BanRequest = [
   "ban_req",
@@ -78,8 +98,16 @@ export type BanRequest = [
 export type BlockRequest = [
   "block_req",
   {
-    user1: string,
-    user2: string
+    from: string,
+    to: string
+  }
+];
+
+export type UnblockRequest = [
+  "unblock_req",
+  {
+    from: string,
+    to: string
   }
 ];
 
