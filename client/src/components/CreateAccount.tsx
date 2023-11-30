@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, KeyboardEvent } from 'react';
 import { useAppData } from './App';
 
 
@@ -7,6 +7,13 @@ const CreateAccount = () => {
   const [password, setPassword] = useState('');
 
   const { handleClickCreate, connectionStatus } = useAppData();
+
+  const filterSpecialChars = (e: KeyboardEvent<HTMLInputElement>) => {
+    const disallowed = new Set([';', "'"]);
+    if (disallowed.has(e.key)) {
+      e.preventDefault();
+    }
+  }
 
   return (
     <div className="flex justify-center">
@@ -18,6 +25,7 @@ const CreateAccount = () => {
             className="mt-10 indent-3 rounded w-72 h-10 border-none focus:outline-none"
             type='text'
             placeholder='Username...'
+            onKeyDown={e => filterSpecialChars(e)}
             onChange={e => setName(e.target.value)}
           />
           <input

@@ -1,17 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useWebSocket } from "react-use-websocket/dist/lib/use-websocket";
 import { MessageWindowProps } from "./MessageWindow";
+import { DirectMessage } from "../../types/websocket.types";
 
 interface MessageDisplayProps extends MessageWindowProps {}
 
-type Message = {
-  from: string,
-  to: string,
-  message: string
-}
+
 
 const MessageDisplay = ({ name, selected }: MessageDisplayProps) => {
-  const [messageHistory, setMessageHistory] = useState<Message[]>([]);
+  const [messageHistory, setMessageHistory] = useState<DirectMessage[]>([]);
 
   const displayRef = useRef(document.createElement("div"));
 
@@ -40,7 +37,7 @@ const MessageDisplay = ({ name, selected }: MessageDisplayProps) => {
     }
   });
 
-  const displayFilter = (m: Message) => {
+  const displayFilter = (m: DirectMessage) => {
     return (m.from === selected && m.to === name)
     || (m.from === name && m.to === selected);
   }
