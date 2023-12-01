@@ -2,11 +2,11 @@ import Register from './Register';
 import Main from './Main';
 import { useState } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
+import MessageBoard from './MessageBoard';
 
 const App = () => {
   const [userID, setUserID] = useState(-1);
   const [name, setName] = useState("");
-
   const { sendJsonMessage, readyState } = useWebSocket(import.meta.env.VITE_WS_URL, {
     share: true,
     onOpen: () => {
@@ -42,18 +42,7 @@ const App = () => {
 
   return (
     <div className={`h-screen ${userID < 0 ? "bg-bg-color" : "bg-white"}`}>
-    {
-      userID < 0 ? (
-        <Register
-          handleClickLogin={(u, p) => handleClickLogin(u, p)}
-          connectionStatus={connectionStatus}
-        />
-      ) : (
-        <Main
-          name={name}
-        />
-      )
-    }
+      <Main/>
     </div>
   );
 }

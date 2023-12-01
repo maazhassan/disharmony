@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useWebSocket } from "react-use-websocket/dist/lib/use-websocket";
 import MessageWindow from "./messagewindow/MessageWindow";
 import UserList from "./UserList";
+import "../main.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserGroup } from "@fortawesome/free-solid-svg-icons/faUserGroup";
+import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
 
 type MainProps = {
   name: string
@@ -42,17 +46,42 @@ const Main = ({ name }: MainProps) => {
   }
 
   return (
-    <div className="flex flex-row gap-6">
-      <UserList
-        users={users.filter(user => user !== name)}
-        onSelect={name => onSelect(name)}
-        selected={selected}
-      />
-      <MessageWindow 
-        name={name}
-        selected={selected}
-      />
+  <>
+    <div className="title-box">
+      <h2 className="disharmony-title">Disharmony</h2>
+      <FontAwesomeIcon icon={faUserGroup} className="friends-icon"/>
     </div>
+    
+    <div className="cols-box">
+
+      <div className="txt-channel">
+        <h2 className="text-channels-h2">Text Channels</h2>
+        <div className="column-1">
+          <div className="text-channels">
+            <h3>General</h3>
+          </div>
+        </div>
+
+        <div className="friends-list">
+          <h3>Friends</h3>
+        </div>
+      </div>
+
+      <div className="chat-window">
+        <h2 className="general-channel-h2">General Channel</h2>
+
+        <div className="send-msg">
+          <input type="text" className="chat-input" placeholder="Send a message..." />
+        </div>
+        
+        
+      </div>
+
+      <div className="user-window"> 
+        <h2 className="users-channel-h2">Users</h2>
+      </div>
+  </div>
+  </>
   );
 }
 
