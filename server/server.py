@@ -14,6 +14,9 @@ def error_event(type, message):
 def user_update_event(username, online):
     return json.dumps(["user_update", {"username": username, "online": online}])
 
+def register_response_event(success):
+    return json.dumps(["register_res", {"success": success}])
+
 # Generates the data object that a user gets upon login
 def login_data_event(user: dict):
     # Get direct messages
@@ -93,34 +96,78 @@ async def login_res(username, password, websocket):
         ADMIN_SET.add(websocket)
     else:
         USER_SET.add(websocket)
+    print(f"{username} has logged in.")
     
     # Return data about state of application
     await websocket.send(login_data_event(user))
     return True
 
+async def logout(username, websocket):
+    # Update online status in DB
+    db.users.update_one({"username": username}, {"$set": {"online": False}})
 
-# def register_event(id):
-#     return json.dumps({"type": "register", "id": id})
+    # Remove info about this connection
+    CLIENTS.pop(username)
+    ADMIN_SET.discard(websocket)
+    USER_SET.discard(websocket)
+    print(f"{username} has logged out.")
 
-# def users_event():
-#     return json.dumps({"type": "users", "value": list(CLIENTS)})
+    # Broadcast that this client is offline
+    websockets.broadcast(CLIENTS.values(), user_update_event(username, False))
+
+async def register(username, password, websocket):
+    # Validate username
+    if (not username) or (";" in username):
+        await websocket.send(register_response_event(False))
+        return
+    
+    # Get user from DB
+    user = db.users.find_one({"username": username})
+
+    # Only register if an account with this username doesn't exist
+    if not user:
+        # Insert entry into DB
+        db.users.insert_one({
+            "username": username,
+            "password": password,
+            "type": "USER",
+            "online": False,
+            "channels": ["General"]
+        })
+
+        print(f"User {username} created.")
+        await websocket.send(register_response_event(True))
+    else:
+        await websocket.send(register_response_event(False))
+        
 
 async def messages(websocket):
-    message = await websocket.recv()
-    req = json.loads(message)
-    req_type = req[0]
+    username = ""
 
-    # The first request from a socket should always be either login or register
-    if req_type == "login_req":
-        if not (await login_res(req[1]["username"], req[1]["password"], websocket)):
-            return
-    elif req_type == "register_req":
-        return
-
-    # At this point the socket is authenticated
     async for message in websocket:
-        print("hi")
-            
+        req = json.loads(message)
+        req_type = req[0]
+        req_body = req[1]
+
+        # The first request from a socket should always be either login or register
+        if req_type == "login_req":
+            if not (await login_res(req_body["username"], req_body["password"], websocket)):
+                continue
+            # Login was successful, store username for later
+            username = req[1]["username"]
+        elif req_type == "register_req":
+            await register(req_body["username"], req_body["password"], websocket)
+            continue
+
+        # Ignore all requests other than login or register from unauthenticated sockets
+        if not username:
+            continue
+
+    
+    # Logout if logged in
+    print("Connection closed.")
+    if username:
+        await logout(username, websocket)
 
     #     # Check the name and register if unique
     #     name = ""

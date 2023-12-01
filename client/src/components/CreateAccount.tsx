@@ -6,7 +6,7 @@ const CreateAccount = () => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
 
-  const { handleClickCreate, connectionStatus } = useAppData();
+  const { handleClickCreate, connectionStatus, registerMessage } = useAppData();
 
   const filterSpecialChars = (e: KeyboardEvent<HTMLInputElement>) => {
     const disallowed = new Set([';', "'"]);
@@ -42,6 +42,9 @@ const CreateAccount = () => {
         >
           Create
         </button>
+        <span className="mt-8 text-red-500">
+          {registerMessage !== "" ? registerMessage : null}
+        </span>
       </div>
     </div>
   );

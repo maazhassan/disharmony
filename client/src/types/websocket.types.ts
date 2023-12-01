@@ -53,6 +53,13 @@ export type RegisterRequest = [
   }
 ];
 
+export type RegisterResponse = [
+  "register_res",
+  {
+    success: boolean
+  }
+]
+
 export type MessageBase = {
   from: string,
   message: string
