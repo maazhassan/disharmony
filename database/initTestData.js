@@ -60,7 +60,8 @@ db.channels.insertMany([
         from: 'Adele',
         message: "Rolling in the deeeeeeeeeeep"
       }
-    ]
+    ],
+    users: ['Admin', 'John', 'Carol', 'Santa', 'Adele']
   },
   {
     name: 'Another One',
@@ -69,10 +70,12 @@ db.channels.insertMany([
         from: 'John',
         message: "It's pretty empty here..."
       }
-    ]
+    ],
+    users: ['Admin', 'John', 'Carol']
   },
   {
-    name: 'Another One Part 2'
+    name: 'Another One Part 2',
+    users: ['Admin']
   }
 ]);
 

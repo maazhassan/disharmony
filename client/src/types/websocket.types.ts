@@ -11,22 +11,39 @@ export type User = {
   online: boolean
 }
 
-export type LoginResponse = [
-  "login_res",
+export type LoginData = [
+  "login_data",
   {
     user_type: string,
-    direct_messages: DirectMessage[],
+    direct_messages: {
+      friend: string,
+      messages: MessageBase[]
+    }[],
     blocked_users: string[],
     friends: string[],
     friend_requests: string[],
     users: User[],
     channels: {
       name: string,
-      users: User[],
-      messages: ChannelMessage[]
-    }
+      users: string[],
+      messages: MessageBase[]
+    }[]
   }
 ];
+
+export type LoginError = [
+  "login_err",
+  {
+    message: string
+  }
+];
+
+export type LoginResponse = LoginData | LoginError;
+
+export type UserUpdate = [
+  "user_update",
+  User
+]
 
 export type RegisterRequest = [
   "register_req",
@@ -108,12 +125,5 @@ export type UnblockRequest = [
   {
     from: string,
     to: string
-  }
-];
-
-export type ErrorRes = [
-  "error",
-  {
-    message: string
   }
 ];

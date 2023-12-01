@@ -8,6 +8,7 @@ import {
   RouterProvider
 } from 'react-router-dom'
 import './index.css'
+import Main from './components/Main.tsx'
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
         path: "create",
         element: <CreateAccount />
       },
+      {
+        path: "main",
+        element: <Main />
+      }
     ],
   },
 ]);

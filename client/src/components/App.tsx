@@ -6,6 +6,7 @@ import {
   useOutletContext,
   useLocation
 } from 'react-router-dom';
+import { LoginData, LoginRequest, LoginResponse } from '../types/websocket.types';
 
 type ContextType = {
   userID: number,
@@ -29,21 +30,27 @@ const App = () => {
     }
   }, [userID, location, navigate])
 
+  const isData = (event: LoginResponse): event is LoginData => event[0] === "login_data";
+
   const { sendJsonMessage, readyState } = useWebSocket(import.meta.env.VITE_WS_URL, {
     share: true,
     onOpen: () => {
       console.log("Websocket connection established.");
     },
     onMessage: m => {
-      const event = JSON.parse(m.data);
-      if (event.type === "register") {
+      const event: LoginResponse = JSON.parse(m.data);
+      if (isData(event)) {
         console.log(event);
-        setUserID(event.id);
+        setUserID(1);
+      }
+      else {
+        console.log(event[1].message);
       }
     },
     filter: m => {
       const event = JSON.parse(m.data);
-      return event.type === "register";
+      const req_type = event[0];
+      return (req_type === "login_data" || req_type === "login_err");
     },
     shouldReconnect: () => true,
   });
@@ -57,7 +64,14 @@ const App = () => {
   }[readyState];
 
   const handleClickLogin = (u: string, p: string) => {
-    sendJsonMessage({username: u, password: p});
+    const loginReq: LoginRequest = [
+      "login_req",
+      {
+        username: u,
+        password: p
+      }
+    ];
+    sendJsonMessage(loginReq);
     setName(u);
   }
 
