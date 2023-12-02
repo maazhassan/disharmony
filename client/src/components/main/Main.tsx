@@ -8,7 +8,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserGroup } from "@fortawesome/free-solid-svg-icons/faUserGroup";
 import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
 import TextChannels from "./leftbar/TextChannels";
-import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, MainSocketEvents, MessageBase } from "../../types/websocket.types";
+import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, MainSocketEvents, MessageBase, User, UserUpdate } from "../../types/websocket.types";
+import Friends from "./leftbar/Friends";
 
 const Main = () => {
   const { username, loginData } = useAppData();
@@ -28,6 +29,7 @@ const Main = () => {
 
   const isChannelData = (event: MainSocketEvents): event is ChannelDataResponse => event[0] === "channel_data_res";
   const isChannelMessage = (event: MainSocketEvents): event is ChannelMessageRequest => event[0] === "channel_message_req";
+  const isUserUpdate = (event: MainSocketEvents): event is UserUpdate => event[0] === "user_update";
 
   const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
     share: true,
@@ -49,13 +51,40 @@ const Main = () => {
           );
         }
       }
+      else if (isUserUpdate(event)) {
+        const eventUser = event[1];
+        let useridx = -1;
+        for (let i = 0; i < users.length; i++) {
+          if (users[i].username === eventUser.username) {
+            useridx = i;
+            break;
+          }
+        }
+        if (useridx === -1) {
+          setUsers(
+            [
+              ...users,
+              eventUser
+            ]
+          );
+        }
+        else {
+          setUsers(
+            [
+              ...users.filter((_, i) => i !== useridx),
+              eventUser
+            ]
+          );
+        }
+      }
     },
     filter: m => {
       const event = JSON.parse(m.data);
       const req_type = event[0];
       return (
         req_type === "channel_data_res" ||
-        req_type === "channel_message_req"
+        req_type === "channel_message_req" ||
+        req_type === "user_update"
       );
     }
   });
@@ -102,7 +131,7 @@ const Main = () => {
       </div>
 
       <div className="cols-box">
-        <div className="txt-channel">
+        <div className="w-[15%] bg-modal-color flex flex-col">
           <h2 className="text-channels-h2">Text Channels</h2>
 
           <TextChannels
@@ -111,9 +140,12 @@ const Main = () => {
             onSelect={channel => onSelectChannel(channel)}
           />
 
-          <div className="friends-list">
-            <h3>Friends</h3>
-          </div>
+          <Friends
+            friends={new Set(friends)}
+            users={users}
+            selected={selectedFriend}
+            onSelect={friend => onSelectFriend(friend)}
+          />
 
         </div>
 

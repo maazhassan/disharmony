@@ -6,7 +6,7 @@ type TextChannelsProps = {
 
 const TextChannels = ({ channels, selected, onSelect }: TextChannelsProps) => {
   return (
-    <div className="h-[50vh]">
+    <div className="h-[50vh] overflow-auto">
       <ul>
       {channels.map((channel: string, idx) => 
         <li key={idx}>

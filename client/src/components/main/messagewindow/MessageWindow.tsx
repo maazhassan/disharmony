@@ -62,7 +62,7 @@ const MessageWindow = ({
             key={idx}
             name={message.from}
             message={message.message}
-            className={`m-4 ${message.from === username ? "ml-auto" : ""}`}
+            className={`m-4 p-3 ${message.from === username ? "ml-auto" : ""}`}
           />
         )
       )
@@ -74,7 +74,7 @@ const MessageWindow = ({
             key={idx}
             name={message.from}
             message={message.message}
-            className={`m-4 ${message.from === username ? "ml-auto" : ""}`}
+            className={`m-4 p-3 ${message.from === username ? "ml-auto" : ""}`}
           />
         )
       )

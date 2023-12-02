@@ -66,10 +66,6 @@ body, html {
   font-weight: 500;
 }
 
-.friends-list {
-  height: vh;
-}
-
 .cols-box {
   display: flex;
   width: 100%;
@@ -77,28 +73,10 @@ body, html {
   /* overflow: hidden; */
 }
 
-.txt-channel {
-  width: 15%;
-  background-color: #635870;
-}
-
 .user-window {
   width: 15%;
   background-color: #635870;
 }
-
-.txt-channel h3 {
-  color: white;
-  font-size: 1.1rem;
-  text-indent: 1rem;
-  padding: 1rem 0.25rem;
-  font-weight: 500;
-}
-
-.friends-list h3 {
-  border-top: 2px solid black;
-}
-
 
 .chat-input {
   padding: 0.5rem 0.5rem;

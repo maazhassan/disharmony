@@ -161,4 +161,7 @@ export type UnblockRequest = [
   }
 ];
 
-export type MainSocketEvents = ChannelDataResponse | ChannelMessageRequest
+export type MainSocketEvents = 
+  ChannelDataResponse | 
+  ChannelMessageRequest |
+  UserUpdate;
