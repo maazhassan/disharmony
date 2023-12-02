@@ -12,6 +12,7 @@ export default {
         "modal-color": "#635971",
         "ban-color": "#C73F47",
         "app-pink": "#ED7B82",
+        "text-input-bg": "#9D92AB"
       },
     },
   },

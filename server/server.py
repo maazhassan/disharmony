@@ -137,6 +137,9 @@ async def register(username, password, websocket):
 
         print(f"User {username} created.")
         await websocket.send(register_response_event(True))
+
+        # Tell all the clients a new user has registered
+        websockets.broadcast(CLIENTS.values(), user_update_event(username, False))
     else:
         await websocket.send(register_response_event(False))
         

@@ -1,17 +1,13 @@
 import { useEffect, useState } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
-import { 
-  useNavigate,
-  Outlet,
-  useOutletContext,
-  useLocation
-} from 'react-router-dom';
+import { useNavigate, Outlet, useOutletContext, useLocation } from 'react-router-dom';
 import { LoginData, LoginError, LoginRequest, LoginResponse, RegisterRequest, RegisterResponse } from '../types/websocket.types';
 
 type ContextType = {
   username: string,
   connectionStatus: string,
-  registerMessage: string
+  registerMessage: string,
+  loginData: LoginData,
   handleClickLogin: (u: string, p: string) => void,
   handleClickCreate: (u: string, p: string) => void
 }
@@ -19,6 +15,18 @@ type ContextType = {
 const App = () => {
   const [username, setName] = useState("");
   const [regMes, setRegMes] = useState("");
+  const [loginData, setLoginData] = useState<LoginData>([
+    "login_data",
+    {
+      user_type: "",
+      direct_messages: [],
+      blocked_users: [],
+      friends: [],
+      friend_requests: [],
+      users: [],
+      channels: []
+    }
+  ]);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,7 +49,7 @@ const App = () => {
     onMessage: m => {
       const event: LoginResponse | RegisterResponse = JSON.parse(m.data);
       if (isData(event)) {
-        console.log(event);
+        setLoginData(event);
         navigate("/main");
       }
       else if (isLoginError(event)) {
@@ -98,11 +106,12 @@ const App = () => {
   }
 
   return (
-    <div className={`h-screen ${username === "" ? "bg-bg-color" : "bg-white"}`}>
+    <div className="h-screen bg-bg-color">
       <Outlet context={{
         username: username,
         connectionStatus: connectionStatus,
         registerMessage: regMes,
+        loginData: loginData,
         handleClickLogin: (u: string, p: string) => handleClickLogin(u, p),
         handleClickCreate: (u: string, p: string) => handleClickCreate(u, p)
       } satisfies ContextType} />

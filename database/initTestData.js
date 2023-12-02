@@ -79,6 +79,8 @@ db.channels.insertMany([
   }
 ]);
 
+db.channels.createIndex({name: 1}, {unique: true});
+
 db.dm_convos.insertOne([
   {
     convo: 'John;Carol',

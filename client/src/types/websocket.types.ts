@@ -86,6 +86,14 @@ export type CreateChannelRequest = [
   }
 ];
 
+export type JoinChannelRequest = [
+  "join_channel_req",
+  {
+    user: string,
+    channel: string
+  }
+]
+
 export type FriendRequest = [
   "friend_request_req",
   {
