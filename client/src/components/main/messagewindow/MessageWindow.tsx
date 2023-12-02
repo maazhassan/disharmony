@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { ChannelsData, DirectMessage, DirectMessageData } from "../../../types/websocket.types";
-import useWebSocket from "react-use-websocket";
+import { MessageBase } from "../../../types/websocket.types";
+// import useWebSocket from "react-use-websocket";
 import useResizeObserver from "@react-hook/resize-observer";
 import MessageBubble from "./MessageBubble";
 
@@ -10,21 +10,19 @@ export interface MessageWindowPropsOLD {
 }
 
 type MessageWindowProps = {
-  selectedChannel: string,
-  selectedFriend: string,
-  channels: ChannelsData[],
-  directMessages: DirectMessageData[],
+  selectedChannelMessages: MessageBase[],
+  selectedFriendMessages: MessageBase[],
+  isChannelSelected: boolean,
   username: string
 }
 
 const MessageWindow = ({ 
-  selectedChannel,
-  selectedFriend,
-  channels,
-  directMessages,
+  selectedChannelMessages,
+  selectedFriendMessages,
+  isChannelSelected,
   username
 }: MessageWindowProps) => {
-  const [messageHistory, setMessageHistory] = useState<DirectMessage[]>([]);
+  // const [messageHistory, setMessageHistory] = useState<DirectMessage[]>([]);
   const [text, setText] = useState<string | null>('');
 
   const displayRef = useRef(document.createElement("div"));
@@ -32,31 +30,32 @@ const MessageWindow = ({
 
   useEffect(() => {
     displayRef.current.scrollTop = displayRef.current.scrollHeight;
-  }, [messageHistory]);
+  }, [selectedChannelMessages, selectedFriendMessages]);
 
-  const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
-    share: true,
-    onMessage: m => {
-      const event = JSON.parse(m.data);
-      if (event.type === "message") {
-        console.log(event);
-        setMessageHistory(
-          [
-            ...messageHistory,
-            { from: event.from, to: event.to, message: event.message }
-          ]
-        );
-      }
-    },
-    filter: m => {
-      const event = JSON.parse(m.data);
-      return event.type === "message";
-    }
-  });
+  // const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
+  //   share: true,
+  //   onMessage: m => {
+  //     const event = JSON.parse(m.data);
+  //     if (event.type === "message") {
+  //       console.log(event);
+  //       setMessageHistory(
+  //         [
+  //           ...messageHistory,
+  //           { from: event.from, to: event.to, message: event.message }
+  //         ]
+  //       );
+  //     }
+  //   },
+  //   filter: m => {
+  //     const event = JSON.parse(m.data);
+  //     return event.type === "message";
+  //   }
+  // });
 
   const sendMessage = () => {
     if (text?.length !== 0) {
-      sendJsonMessage({type: "message", from: name, to: selected, message: text});
+      // sendJsonMessage({type: "message", from: username, to: selected, message: text});
+
       textAreaRef.current.textContent = "";
       setText("");
       textAreaRef.current.focus();
@@ -72,11 +71,11 @@ const MessageWindow = ({
   }
 
   const filterMessages = () => {
-    if (selectedChannel) {
+    if (isChannelSelected) {
       return (
-        channels.find(channel => channel.name === selectedChannel)?.messages
-        .map(message => 
-          <MessageBubble 
+        selectedChannelMessages.map((message, idx) => 
+          <MessageBubble
+            key={idx}
             name={message.from}
             message={message.message}
             className={`m-4 ${message.from === username ? "ml-auto" : ""}`}
@@ -86,9 +85,9 @@ const MessageWindow = ({
     }
     else {
       return (
-        directMessages.find(convo => convo.friend === selectedFriend)?.messages
-        .map(message => 
-          <MessageBubble 
+        selectedFriendMessages.map((message, idx) => 
+          <MessageBubble
+            key={idx}
             name={message.from}
             message={message.message}
             className={`m-4 ${message.from === username ? "ml-auto" : ""}`}

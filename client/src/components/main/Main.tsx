@@ -8,46 +8,75 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserGroup } from "@fortawesome/free-solid-svg-icons/faUserGroup";
 import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
 import TextChannels from "./leftbar/TextChannels";
+import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, MainSocketEvents, MessageBase } from "../../types/websocket.types";
 
 const Main = () => {
   const { username, loginData } = useAppData();
   const data = loginData[1];
 
   const [selectedChannel, setSelectedChannel] = useState("General");
+  const [selectedChannelUsers, setSelectedChannelUsers] = useState(data.general_data.users);
+  const [selectedChannelMessages, setSelectedChannelMessages] = useState(data.general_data.messages);
   const [selectedFriend, setSelectedFriend] = useState("");
+  const [selectedFriendMessages, setSelectedFriendMessages] = useState<MessageBase[]>([]);
   const [userType, setUserType] = useState(data.user_type);
-  const [directMessages, setDirectMessages] = useState(data.direct_messages);
   const [blockedUsers, setBlockedUsers] = useState(data.blocked_users);
   const [friends, setFriends] = useState(data.friends);
   const [friendRequests, setFriendRequests] = useState(data.friend_requests);
   const [users, setUsers] = useState(data.users);
   const [channels, setChannels] = useState(data.channels);
 
+  const isChannelData = (event: MainSocketEvents): event is ChannelDataResponse => event[0] === "channel_data_res";
+
   const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
     share: true,
     onMessage: m => {
       const event = JSON.parse(m.data);
-      if (event.type === "users") {
-        console.log(event);
-        if (!event.value.includes(selected)) {
-          setSelected('');
-        }
+      if (isChannelData(event)) {
+        const channelData = event[1].data;
+        setSelectedChannelUsers(channelData.users);
+        setSelectedChannelMessages(channelData.messages);
       }
     },
     filter: m => {
       const event = JSON.parse(m.data);
-      return event.type === "users";
+      const req_type = event[0];
+      return (req_type === "channel_data_res");
     }
   });
 
   const onSelectChannel = (channel: string) => {
     setSelectedChannel(channel);
     setSelectedFriend("");
+    const channelDataReq: ChannelDataRequest = [
+      "channel_data_req",
+      {
+        channel: channel
+      }
+    ];
+    sendJsonMessage(channelDataReq);
   }
 
   const onSelectFriend = (friend: string) => {
     setSelectedFriend(friend);
     setSelectedChannel("");
+  }
+
+  const onSendMessage = message => {
+    if (selectedChannel) {
+      const channelMessageReq: ChannelMessageRequest = [
+        "channel_message_req",
+        {
+          from: username,
+          channel: selectedChannel,
+          message: message
+        }
+      ];
+      sendJsonMessage(channelMessageReq);
+    }
+    else {
+
+    }
   }
 
   return (
@@ -62,7 +91,7 @@ const Main = () => {
           <h2 className="text-channels-h2">Text Channels</h2>
 
           <TextChannels
-            channels={["General", "Another One"]}
+            channels={channels}
             selected={selectedChannel}
             onSelect={channel => onSelectChannel(channel)}
           />
@@ -74,10 +103,9 @@ const Main = () => {
         </div>
 
         <MessageWindow 
-          selectedChannel={selectedChannel}
-          selectedFriend={selectedFriend}
-          channels={channels}
-          directMessages={directMessages}
+          selectedChannelMessages={selectedChannelMessages}
+          selectedFriendMessages={selectedFriendMessages}
+          isChannelSelected={true}
           username={username}
         />
 

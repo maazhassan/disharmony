@@ -17,20 +17,34 @@ def user_update_event(username, online):
 def register_response_event(success):
     return json.dumps(["register_res", {"success": success}])
 
+def channel_data_response_event(data):
+    return json.dumps(["channel_data_res", {"data": data}])
+
+def get_channel_data(name):
+    channel = db.channels.find_one({"name": name})
+    messages = channel.get("messages")
+    if not messages:
+        messages = []
+    return {
+        "name": name,
+        "users": channel["users"],
+        "messages": messages
+    }
+
 # Generates the data object that a user gets upon login
 def login_data_event(user: dict):
     # Get direct messages
-    direct_messages = []
     friends = user.get("friends")
-    if friends:
-        for friend in friends:
-            convo_string = user["username"] + ";" + friend
-            convo = db.dm_convos.find_one({"convo": convo_string})
-            if convo:
-                direct_messages.append({
-                    "friend": friend,
-                    "messages": convo["messages"]
-                })
+    # direct_messages = []
+    # if friends:
+    #     for friend in friends:
+    #         convo_string = user["username"] + ";" + friend
+    #         convo = db.dm_convos.find_one({"convo": convo_string})
+    #         if convo:
+    #             direct_messages.append({
+    #                 "friend": friend,
+    #                 "messages": convo["messages"]
+    #             })
     
     # Blocked users
     blocked_users = user.get("blocked")
@@ -44,28 +58,34 @@ def login_data_event(user: dict):
         "online": _user["online"]
     } for _user in db.users.find(projection=['username', 'online'])]
 
+    # Channels the user is in
+    if user["type"] == "ADMIN":
+        channel_names = [c["name"] for c in db.channels.find(projection=['name'])]
+    else:
+        channel_names = user["channels"]
+
     # Channels and their messages
-    channels_cursor = (db.channels.find()
-                       if user["type"] == "ADMIN"
-                       else db.channels.find({"name": {"$in": user["channels"]}})
-                       )
-    channels_info = [{
-        "name": channel["name"],
-        "users": channel["users"],
-        "messages": channel.get("messages") if channel.get("messages") else []
-    } for channel in channels_cursor]
+    # channels_cursor = (db.channels.find()
+    #                    if user["type"] == "ADMIN"
+    #                    else db.channels.find({"name": {"$in": user["channels"]}})
+    #                    )
+    # channels_info = [{
+    #     "name": channel["name"],
+    #     "users": channel["users"],
+    #     "messages": channel.get("messages") if channel.get("messages") else []
+    # } for channel in channels_cursor]
 
     # Serialize
     return json.dumps([
         "login_data",
         {
             "user_type": user["type"],
-            "direct_messages": direct_messages,
             "blocked_users": blocked_users if blocked_users else [],
             "friends": friends if friends else [],
             "friend_requests": friend_reqs if friend_reqs else [],
             "users": users_info,
-            "channels": channels_info
+            "channels": channel_names,
+            "general_data": get_channel_data("General")
         }
     ])
 
@@ -165,6 +185,11 @@ async def messages(websocket):
         # Ignore all requests other than login or register from unauthenticated sockets
         if not username:
             continue
+
+        if req_type == "channel_data_req":
+            channel_name = req_body["channel"]
+            channel_data = get_channel_data(channel_name)
+            await websocket.send(channel_data_response_event(channel_data))
 
     
     # Logout if logged in

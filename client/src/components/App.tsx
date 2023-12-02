@@ -20,12 +20,16 @@ const App = () => {
     "login_data",
     {
       user_type: "",
-      direct_messages: [],
       blocked_users: [],
       friends: [],
       friend_requests: [],
       users: [],
-      channels: []
+      channels: [],
+      general_data: {
+        name: "",
+        users: [],
+        messages: []
+      }
     }
   ]);
 

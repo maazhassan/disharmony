@@ -11,12 +11,12 @@ export type User = {
   online: boolean
 }
 
-export type DirectMessageData = {
-  friend: string,
-  messages: MessageBase[]
-}
+// export type DirectMessageData = {
+//   friend: string,
+//   messages: MessageBase[]
+// }
 
-export type ChannelsData = {
+export type ChannelData = {
   name: string,
   users: string[],
   messages: MessageBase[]
@@ -26,12 +26,26 @@ export type LoginData = [
   "login_data",
   {
     user_type: string,
-    direct_messages: DirectMessageData[],
     blocked_users: string[],
     friends: string[],
     friend_requests: string[],
     users: User[],
-    channels: ChannelsData[]
+    channels: string[],
+    general_data: ChannelData
+  }
+];
+
+export type ChannelDataRequest = [
+  "channel_data_req",
+  {
+    channel: string
+  }
+];
+
+export type ChannelDataResponse = [
+  "channel_data_res",
+  {
+    data: ChannelData
   }
 ];
 
@@ -146,3 +160,5 @@ export type UnblockRequest = [
     to: string
   }
 ];
+
+export type MainSocketEvents = ChannelDataResponse
