@@ -27,6 +27,7 @@ const Main = () => {
   const [channels, setChannels] = useState(data.channels);
 
   const isChannelData = (event: MainSocketEvents): event is ChannelDataResponse => event[0] === "channel_data_res";
+  const isChannelMessage = (event: MainSocketEvents): event is ChannelMessageRequest => event[0] === "channel_message_req";
 
   const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
     share: true,
@@ -37,11 +38,25 @@ const Main = () => {
         setSelectedChannelUsers(channelData.users);
         setSelectedChannelMessages(channelData.messages);
       }
+      else if (isChannelMessage(event)) {
+        const channelMessage = event[1];
+        if (selectedChannel === channelMessage.channel) {
+          setSelectedChannelMessages(
+            [
+              ...selectedChannelMessages,
+              { from: channelMessage.from, message: channelMessage.message }
+            ]
+          );
+        }
+      }
     },
     filter: m => {
       const event = JSON.parse(m.data);
       const req_type = event[0];
-      return (req_type === "channel_data_res");
+      return (
+        req_type === "channel_data_res" ||
+        req_type === "channel_message_req"
+      );
     }
   });
 
@@ -62,7 +77,7 @@ const Main = () => {
     setSelectedChannel("");
   }
 
-  const onSendMessage = message => {
+  const onSendMessage = (message: string) => {
     if (selectedChannel) {
       const channelMessageReq: ChannelMessageRequest = [
         "channel_message_req",
@@ -105,8 +120,9 @@ const Main = () => {
         <MessageWindow 
           selectedChannelMessages={selectedChannelMessages}
           selectedFriendMessages={selectedFriendMessages}
-          isChannelSelected={true}
+          isChannelSelected={selectedFriend === ""}
           username={username}
+          onSendMessage={message => onSendMessage(message)}
         />
 
         <div className="user-window"> 

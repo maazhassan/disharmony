@@ -190,10 +190,26 @@ async def messages(websocket):
             channel_name = req_body["channel"]
             channel_data = get_channel_data(channel_name)
             await websocket.send(channel_data_response_event(channel_data))
+            continue
+
+        if req_type == "channel_message_req":
+            # Add message to DB
+            db.channels.update_one(
+                {"name": req_body["channel"]}, 
+                {"$push": {"messages": {
+                    "from": req_body["from"],
+                    "message": req_body["message"]
+                }}}
+            )
+
+            # Broadcast the message to all online clients in the channel
+            users_in_channel = db.channels.find_one({"name": req_body["channel"]}, ['users'])['users']
+            out = [CLIENTS.get(name) for name in users_in_channel if CLIENTS.get(name)]
+            websockets.broadcast(out, message)
 
     
-    # Logout if logged in
     print("Connection closed.")
+    # Logout if logged in
     if username:
         await logout(username, websocket)
 

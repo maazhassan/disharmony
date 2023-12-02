@@ -13,17 +13,18 @@ type MessageWindowProps = {
   selectedChannelMessages: MessageBase[],
   selectedFriendMessages: MessageBase[],
   isChannelSelected: boolean,
-  username: string
+  username: string,
+  onSendMessage: (message: string) => void
 }
 
 const MessageWindow = ({ 
   selectedChannelMessages,
   selectedFriendMessages,
   isChannelSelected,
-  username
+  username,
+  onSendMessage
 }: MessageWindowProps) => {
-  // const [messageHistory, setMessageHistory] = useState<DirectMessage[]>([]);
-  const [text, setText] = useState<string | null>('');
+  const [text, setText] = useState("");
 
   const displayRef = useRef(document.createElement("div"));
   const textAreaRef = useRef(document.createElement("div"));
@@ -32,30 +33,9 @@ const MessageWindow = ({
     displayRef.current.scrollTop = displayRef.current.scrollHeight;
   }, [selectedChannelMessages, selectedFriendMessages]);
 
-  // const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
-  //   share: true,
-  //   onMessage: m => {
-  //     const event = JSON.parse(m.data);
-  //     if (event.type === "message") {
-  //       console.log(event);
-  //       setMessageHistory(
-  //         [
-  //           ...messageHistory,
-  //           { from: event.from, to: event.to, message: event.message }
-  //         ]
-  //       );
-  //     }
-  //   },
-  //   filter: m => {
-  //     const event = JSON.parse(m.data);
-  //     return event.type === "message";
-  //   }
-  // });
-
   const sendMessage = () => {
     if (text?.length !== 0) {
-      // sendJsonMessage({type: "message", from: username, to: selected, message: text});
-
+      onSendMessage(text);
       textAreaRef.current.textContent = "";
       setText("");
       textAreaRef.current.focus();
@@ -100,7 +80,7 @@ const MessageWindow = ({
   useResizeObserver(textAreaRef, entry => {
     const size = entry.borderBoxSize[0].blockSize;
     const top = displayRef.current.getBoundingClientRect().top;
-    displayRef.current.style.height = `${window.innerHeight - top - (size+48)}px`
+    displayRef.current.style.height = `${window.innerHeight - top - (size+30)}px`
   });
 
   return (
@@ -112,7 +92,7 @@ const MessageWindow = ({
       <div
         className="bg-text-input-bg text-white focus:outline-none rounded max-h-36 w-[98%] px-2 overflow-auto whitespace-pre-wrap absolute bottom-6 left-0 right-0 mx-auto py-2"
         contentEditable={true}
-        onInput={e => setText((e.target as HTMLElement).textContent)}
+        onInput={e => setText((e.target as HTMLElement).textContent || '')}
         ref={textAreaRef}
         onKeyDown={e => handleEnter(e)}
       />
