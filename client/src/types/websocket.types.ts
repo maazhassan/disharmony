@@ -11,23 +11,27 @@ export type User = {
   online: boolean
 }
 
+export type DirectMessageData = {
+  friend: string,
+  messages: MessageBase[]
+}
+
+export type ChannelsData = {
+  name: string,
+  users: string[],
+  messages: MessageBase[]
+}
+
 export type LoginData = [
   "login_data",
   {
     user_type: string,
-    direct_messages: {
-      friend: string,
-      messages: MessageBase[]
-    }[],
+    direct_messages: DirectMessageData[],
     blocked_users: string[],
     friends: string[],
     friend_requests: string[],
     users: User[],
-    channels: {
-      name: string,
-      users: string[],
-      messages: MessageBase[]
-    }[]
+    channels: ChannelsData[]
   }
 ];
 

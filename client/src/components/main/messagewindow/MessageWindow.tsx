@@ -1,15 +1,29 @@
 import { useEffect, useRef, useState } from "react";
-import { DirectMessage } from "../../../types/websocket.types";
+import { ChannelsData, DirectMessage, DirectMessageData } from "../../../types/websocket.types";
 import useWebSocket from "react-use-websocket";
 import useResizeObserver from "@react-hook/resize-observer";
 import MessageBubble from "./MessageBubble";
 
-export interface MessageWindowProps {
+export interface MessageWindowPropsOLD {
   name: string,
   selected: string
 }
 
-const MessageWindow = () => {
+type MessageWindowProps = {
+  selectedChannel: string,
+  selectedFriend: string,
+  channels: ChannelsData[],
+  directMessages: DirectMessageData[],
+  username: string
+}
+
+const MessageWindow = ({ 
+  selectedChannel,
+  selectedFriend,
+  channels,
+  directMessages,
+  username
+}: MessageWindowProps) => {
   const [messageHistory, setMessageHistory] = useState<DirectMessage[]>([]);
   const [text, setText] = useState<string | null>('');
 
@@ -18,7 +32,6 @@ const MessageWindow = () => {
 
   useEffect(() => {
     displayRef.current.scrollTop = displayRef.current.scrollHeight;
-    console.log("scrolled")
   }, [messageHistory]);
 
   const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
@@ -58,6 +71,33 @@ const MessageWindow = () => {
     return;
   }
 
+  const filterMessages = () => {
+    if (selectedChannel) {
+      return (
+        channels.find(channel => channel.name === selectedChannel)?.messages
+        .map(message => 
+          <MessageBubble 
+            name={message.from}
+            message={message.message}
+            className={`m-4 ${message.from === username ? "ml-auto" : ""}`}
+          />
+        )
+      )
+    }
+    else {
+      return (
+        directMessages.find(convo => convo.friend === selectedFriend)?.messages
+        .map(message => 
+          <MessageBubble 
+            name={message.from}
+            message={message.message}
+            className={`m-4 ${message.from === username ? "ml-auto" : ""}`}
+          />
+        )
+      )
+    }
+  }
+
   useResizeObserver(textAreaRef, entry => {
     const size = entry.borderBoxSize[0].blockSize;
     const top = displayRef.current.getBoundingClientRect().top;
@@ -68,11 +108,7 @@ const MessageWindow = () => {
     <div className="flex flex-col w-[70%] relative">
       <h2 className="general-channel-h2">General Channel</h2>
       <div className="w-full overflow-auto" id="lol" ref={displayRef}>
-        <MessageBubble 
-          name="John"
-          message="What's up y'all"
-          className="m-4 ml-auto"
-        />
+        {filterMessages()}
       </div>
       <div
         className="bg-text-input-bg text-white focus:outline-none rounded max-h-36 w-[98%] px-2 overflow-auto whitespace-pre-wrap absolute bottom-6 left-0 right-0 mx-auto py-2"

@@ -15,6 +15,7 @@ type ContextType = {
 const App = () => {
   const [username, setName] = useState("");
   const [regMes, setRegMes] = useState("");
+  
   const [loginData, setLoginData] = useState<LoginData>([
     "login_data",
     {

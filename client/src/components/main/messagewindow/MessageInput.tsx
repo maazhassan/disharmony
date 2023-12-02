@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import { useWebSocket } from "react-use-websocket/dist/lib/use-websocket";
-import { MessageWindowProps } from "./MessageWindow";
+import { MessageWindowPropsOLD } from "./MessageWindow";
 
-interface MessageInputProps extends MessageWindowProps {}
+interface MessageInputProps extends MessageWindowPropsOLD {}
 
 const MessageInput = ({ name, selected }: MessageInputProps) => {
   const [text, setText] = useState<string | null>('');
