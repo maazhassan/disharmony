@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { MessageBase } from "../../../types/websocket.types";
 // import useWebSocket from "react-use-websocket";
 import useResizeObserver from "@react-hook/resize-observer";
@@ -12,7 +12,8 @@ export interface MessageWindowPropsOLD {
 type MessageWindowProps = {
   selectedChannelMessages: MessageBase[],
   selectedFriendMessages: MessageBase[],
-  isChannelSelected: boolean,
+  selectedChannel: string,
+  selectedFriend: string,
   username: string,
   onSendMessage: (message: string) => void
 }
@@ -20,7 +21,8 @@ type MessageWindowProps = {
 const MessageWindow = ({ 
   selectedChannelMessages,
   selectedFriendMessages,
-  isChannelSelected,
+  selectedChannel,
+  selectedFriend,
   username,
   onSendMessage
 }: MessageWindowProps) => {
@@ -29,8 +31,10 @@ const MessageWindow = ({
   const displayRef = useRef(document.createElement("div"));
   const textAreaRef = useRef(document.createElement("div"));
 
-  useEffect(() => {
-    displayRef.current.scrollTop = displayRef.current.scrollHeight;
+  useLayoutEffect(() => {
+    setTimeout(() => {
+      displayRef.current.scrollTop = displayRef.current.scrollHeight;
+    }, 5)
   }, [selectedChannelMessages, selectedFriendMessages]);
 
   const sendMessage = () => {
@@ -51,7 +55,7 @@ const MessageWindow = ({
   }
 
   const filterMessages = () => {
-    if (isChannelSelected) {
+    if (selectedChannel) {
       return (
         selectedChannelMessages.map((message, idx) => 
           <MessageBubble
@@ -85,7 +89,9 @@ const MessageWindow = ({
 
   return (
     <div className="flex flex-col w-[70%] relative">
-      <h2 className="general-channel-h2">General Channel</h2>
+      <h2 className="general-channel-h2">
+        {selectedChannel ? selectedChannel : selectedFriend}
+      </h2>
       <div className="w-full overflow-auto" id="lol" ref={displayRef}>
         {filterMessages()}
       </div>

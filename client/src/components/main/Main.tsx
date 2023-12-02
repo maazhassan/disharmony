@@ -120,7 +120,8 @@ const Main = () => {
         <MessageWindow 
           selectedChannelMessages={selectedChannelMessages}
           selectedFriendMessages={selectedFriendMessages}
-          isChannelSelected={selectedFriend === ""}
+          selectedChannel={selectedChannel}
+          selectedFriend={selectedFriend}
           username={username}
           onSendMessage={message => onSendMessage(message)}
         />
