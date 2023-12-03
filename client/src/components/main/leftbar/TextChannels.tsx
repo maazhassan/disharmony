@@ -102,9 +102,7 @@ onDeleteChannel
         {channels.map((channel: string, idx) => 
           <li
             key={idx}
-            onContextMenu={
-              channel !== "General" ? e => displayChannelMenu(e, channel) : e => e.preventDefault()
-            }
+            onContextMenu={e => displayChannelMenu(e, channel)}
           >
             <div
               className={`${selected === channel ? "text-app-pink" : "text-white"} text-xl font-medium hover:cursor-pointer indent-5 pt-2 select-none`}
@@ -117,12 +115,17 @@ onDeleteChannel
         </ul>
       </div>
       <Menu id={CHANNEL_MENU_ID}>
-        <Item onClick={() => onDeleteChannel(contextChannel)} hidden={userType === "USER"}>
+        <Item onClick={() => onDeleteChannel(contextChannel)} hidden={
+          userType === "USER" || contextChannel === "General"
+        }>
           Delete Channel
         </Item>
         <Item onClick={() => onLeaveChannel(contextChannel)} hidden={userType === "ADMIN"}>
           Leave Channel
         </Item>
+        {/* <Item onClick={() => onLeaveChannel(contextChannel)} hidden={userType === "ADMIN"}>
+          Banned Users
+        </Item> */}
       </Menu>
       <ReactModal
         isOpen={modalIsOpen}

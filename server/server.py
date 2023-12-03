@@ -71,7 +71,13 @@ def login_data_event(user: dict):
     if user["type"] == "ADMIN":
         channel_names = [c["name"] for c in db.channels.find(projection=['name'])]
     else:
-        channel_names = user["channels"]
+        channel_names = user.get("channels") if user.get("channels") else []
+
+    # Initial data if the user is in at least one channel
+    if len(user["channels"]) == 0:
+        initial_data = {"name": "none","users": [],"messages": []}
+    else:
+        initial_data = get_channel_data(user["channels"][0])
 
     # Serialize
     return json.dumps([
@@ -83,7 +89,7 @@ def login_data_event(user: dict):
             "friend_requests": friend_reqs if friend_reqs else [],
             "users": users_info,
             "channels": channel_names,
-            "general_data": get_channel_data("General")
+            "initial_data": initial_data
         }
     ])
 
@@ -429,10 +435,6 @@ async def messages(websocket):
         if req_type == "leave_channel_req":
             # Admins cannot leave channels
             if websocket in ADMIN_SET:
-                continue
-
-            # General channel cannot be left
-            if req_body["channel"] == "General":
                 continue
 
             # Get the list of users in the channel if it exists

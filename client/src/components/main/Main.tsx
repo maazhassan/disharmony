@@ -14,9 +14,9 @@ const Main = () => {
   const data = loginData[1];
   const USER_TYPE = data.user_type;
 
-  const [selectedChannel, setSelectedChannel] = useState("General");
-  const [selectedChannelUsers, setSelectedChannelUsers] = useState(data.general_data.users);
-  const [selectedChannelMessages, setSelectedChannelMessages] = useState(data.general_data.messages);
+  const [selectedChannel, setSelectedChannel] = useState(data.channels.length > 0 ? data.channels[0] : "");
+  const [selectedChannelUsers, setSelectedChannelUsers] = useState(data.initial_data.users);
+  const [selectedChannelMessages, setSelectedChannelMessages] = useState(data.initial_data.messages);
   const [selectedFriend, setSelectedFriend] = useState("");
   const [selectedFriendMessages, setSelectedFriendMessages] = useState<MessageBase[]>([]);
   const [blockedUsers, setBlockedUsers] = useState(data.blocked_users);
@@ -116,7 +116,7 @@ const Main = () => {
       else if (isRemoveFriend(event)) {
         const friendToRemove = event[1].user1 === username ? event[1].user2 : event[1].user1;
         if (selectedFriend === friendToRemove) {
-          onSelectChannel("General");
+          setSelectedChannel("");
         }
         setFriends(friends.filter(f => f !== friendToRemove));
       }
@@ -125,7 +125,7 @@ const Main = () => {
       }
       else if (isDeleteChannel(event)) {
         if (selectedChannel === event[1].name) {
-          onSelectChannel("General");
+          setSelectedChannel("");
         }
         setChannels(channels.filter(c => c !== event[1].name));
       }
@@ -140,7 +140,7 @@ const Main = () => {
       else if (isLeaveChannel(event)) {
         if (selectedChannel === event[1].channel) {
           if (event[1].from === username) {
-            onSelectChannel("General");
+            setSelectedChannel("");
           }
           else {
             setSelectedChannelUsers(selectedChannelUsers.filter(u => u !== event[1].from));

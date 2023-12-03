@@ -27,7 +27,7 @@ export type LoginData = [
     friend_requests: string[],
     users: User[],
     channels: string[],
-    general_data: ChannelData
+    initial_data: ChannelData
   }
 ];
 

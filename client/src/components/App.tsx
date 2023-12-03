@@ -25,7 +25,7 @@ const App = () => {
       friend_requests: [],
       users: [],
       channels: [],
-      general_data: {
+      initial_data: {
         name: "",
         users: [],
         messages: []
