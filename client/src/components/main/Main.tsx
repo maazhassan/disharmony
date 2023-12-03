@@ -235,6 +235,7 @@ const Main = () => {
     <div className="flex flex-col h-screen">
       <Header 
         friendRequests={friendRequests}
+        blocked={blockedUsers}
         onRespond={onRespondFriendReq}
       />
 
