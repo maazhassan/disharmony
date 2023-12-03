@@ -2,6 +2,7 @@ import asyncio
 import websockets
 import json
 from pymongo import MongoClient
+from pymongo.errors import DuplicateKeyError
 
 ADMIN_SET = set()
 USER_SET = set()
@@ -346,6 +347,49 @@ async def messages(websocket):
                 {"username": req_body["from"]},
                 {"$pull": {"blocked": req_body["to"]}}
             )
+            continue
+
+        if req_type == "create_channel_req":
+            # Only authenticated admins can make this type of request
+            if websocket not in ADMIN_SET:
+                continue
+
+            # Try adding the channel to the DB
+            try:
+                db.channels.insert_one({
+                    "name": req_body["name"],
+                    "users": [k for k in CLIENTS.keys() if CLIENTS[k] in ADMIN_SET]
+                })
+            except DuplicateKeyError:
+                continue
+
+            # Broadcast to all admins
+            websockets.broadcast(ADMIN_SET, message)
+            continue
+
+        if req_type == "delete_channel_req":
+            # General channel cannot be deleted
+            if req_body["name"] == "General":
+                continue
+
+            # Get the list of users in the channel if it exists
+            chan = db.channels.find_one({"name": req_body["name"]}, ["users"])
+            if chan:
+                users = chan["users"]
+
+            # Remove the channel from the channels list for all users
+            db.users.update_many({
+                "type": {"$ne": "ADMIN"}},
+                {"$pull": {"channels": req_body["name"]}
+            })
+
+            # Remove the channel from the DB
+            db.channels.delete_one({"name": req_body["name"]})
+
+            # Broadcast the deletion to everyone who was in the channel
+            out = [CLIENTS.get(u) for u in users if CLIENTS.get(u)]
+            websockets.broadcast(out, message)
+            continue
     
     print("Connection closed.")
     # Logout if logged in

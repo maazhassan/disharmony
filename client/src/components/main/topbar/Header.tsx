@@ -99,7 +99,7 @@ const Header = ({ friendRequests, blocked, onRespond, onUnblock, onFriendReq, on
           )}
         </ul>
         <input
-          className="absolute bottom-14 right-0 left-0 w-fit mx-auto bg-text-input-bg focus:outline-none rounded text-white py-1 px-1"
+          className="absolute bottom-14 right-0 left-0 w-fit mx-auto bg-text-input-bg focus:outline-none rounded text-white py-1 px-1 placeholder:text-gray-200"
           placeholder="Search..."
           onKeyDown={e => onKeyDown(e, "friend")}
           onChange={e => onChange(e)}
@@ -134,7 +134,7 @@ const Header = ({ friendRequests, blocked, onRespond, onUnblock, onFriendReq, on
           )}
         </ul>
         <input
-          className="absolute bottom-14 right-0 left-0 w-fit mx-auto bg-text-input-bg focus:outline-none rounded text-white py-1 px-1"
+          className="absolute bottom-14 right-0 left-0 w-fit mx-auto bg-text-input-bg focus:outline-none rounded text-white py-1 px-1 placeholder:text-gray-200"
           placeholder="Search..."
           onKeyDown={e => onKeyDown(e, "friend")}
           onChange={e => onChange(e)}

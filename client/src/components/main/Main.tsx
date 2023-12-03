@@ -4,9 +4,8 @@ import MessageWindow from "./messagewindow/MessageWindow";
 import UserList from "./rightbar/UserList";
 import { useAppData } from "../App";
 import "./main.css";
-import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
 import TextChannels from "./leftbar/TextChannels";
-import { BlockRequest, ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, MainSocketEvents, MessageBase, RemoveFriend, UnblockRequest, User, UserUpdate } from "../../types/websocket.types";
+import { BlockRequest, ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DeleteChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, MainSocketEvents, MessageBase, RemoveFriend, UnblockRequest, UserUpdate } from "../../types/websocket.types";
 import Friends from "./leftbar/Friends";
 import Header from "./topbar/Header";
 
@@ -34,6 +33,8 @@ const Main = () => {
   const isFriendReq = (event: MainSocketEvents): event is FriendRequest => event[0] === "friend_request_req";
   const isFriendReqRes = (event: MainSocketEvents): event is FriendRequestResponse => event[0] === "friend_request_res";
   const isRemoveFriend = (event: MainSocketEvents): event is RemoveFriend => event[0] === "remove_friend";
+  const isCreateChannel = (event: MainSocketEvents): event is CreateChannelRequest => event[0] === "create_channel_req";
+  const isDeleteChannel = (event: MainSocketEvents): event is DeleteChannelRequest => event[0] === "delete_channel_req";
 
   const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
     share: true,
@@ -115,6 +116,12 @@ const Main = () => {
           setSelectedChannel("General");
         }
       }
+      else if (isCreateChannel(event)) {
+        setChannels([...channels, event[1].name]);
+      }
+      else if (isDeleteChannel(event)) {
+        setChannels(channels.filter(c => c !== event[1].name));
+      }
     },
     filter: m => {
       const event = JSON.parse(m.data);
@@ -127,7 +134,8 @@ const Main = () => {
         req_type === "direct_message_req" ||
         req_type === "friend_request_req" ||
         req_type === "friend_request_res" ||
-        req_type === "remove_friend"
+        req_type === "remove_friend" ||
+        req_type === "create_channel_req"
       );
     }
   });
@@ -252,6 +260,34 @@ const Main = () => {
     sendJsonMessage(unblockRequest);
   }
 
+  const onCreateChannel = (name: string) => {
+    const createChannelRequest: CreateChannelRequest = [
+      "create_channel_req",
+      {
+        name: name
+      }
+    ];
+    sendJsonMessage(createChannelRequest);
+  }
+
+  const onDeleteChannel = (name: string) => {
+    const deleteChannelRequest: DeleteChannelRequest = [
+      "delete_channel_req",
+      {
+        name: name
+      }
+    ];
+    sendJsonMessage(deleteChannelRequest);
+  }
+
+  const onJoinChannel = (name: string) => {
+    console.log("join channel " + name)
+  }
+
+  const onLeaveChannel = (name: string) => {
+    console.log("leave channel " + name)
+  }
+
   return (
     <div className="flex flex-col h-screen">
       <Header 
@@ -269,13 +305,17 @@ const Main = () => {
             channels={channels}
             selected={selectedChannel}
             userType={USER_TYPE}
-            onSelect={channel => onSelectChannel(channel)}
+            onSelect={onSelectChannel}
+            onCreateChannel={onCreateChannel}
+            onLeaveChannel={onLeaveChannel}
+            onJoinChannel={onJoinChannel}
+            onDeleteChannel={onDeleteChannel}
           />
           <Friends
             friends={new Set(friends)}
             users={users}
             selected={selectedFriend}
-            onSelect={friend => onSelectFriend(friend)}
+            onSelect={onSelectFriend}
             onRemoveFriend={onRemoveFriend}
           />
         </div>

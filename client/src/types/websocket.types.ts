@@ -114,6 +114,13 @@ export type CreateChannelRequest = [
   }
 ];
 
+export type DeleteChannelRequest = [
+  "delete_channel_req",
+  {
+    name: string
+  }
+];
+
 export type JoinChannelRequest = [
   "join_channel_req",
   {
@@ -121,6 +128,14 @@ export type JoinChannelRequest = [
     channel: string
   }
 ]
+
+export type LeaveChannelRequest = [
+  "leave_channel_req",
+  {
+    user: string,
+    channel: string
+  }
+];
 
 export type FriendRequest = [
   "friend_request_req",
@@ -187,4 +202,6 @@ export type MainSocketEvents =
   DirectMessageRequest |
   FriendRequest |
   FriendRequestResponse |
-  RemoveFriend;
+  RemoveFriend |
+  CreateChannelRequest |
+  DeleteChannelRequest;
