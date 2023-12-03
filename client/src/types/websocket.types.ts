@@ -176,4 +176,5 @@ export type MainSocketEvents =
   ChannelMessageRequest |
   UserUpdate |
   DirectMessageDataResponse |
-  DirectMessageRequest;
+  DirectMessageRequest |
+  FriendRequest;

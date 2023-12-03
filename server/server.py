@@ -20,6 +20,12 @@ def register_response_event(success):
 def channel_data_response_event(data):
     return json.dumps(["channel_data_res", {"data": data}])
 
+def dm_data_response_event(data):
+    return json.dumps(["dm_data_res", {"data": data}])
+
+def friend_request_event(_from, to):
+    return json.dumps(["friend_request_req", {"from": _from, "to": to}])
+
 def get_channel_data(name):
     channel = db.channels.find_one({"name": name})
     messages = channel.get("messages")
@@ -34,9 +40,6 @@ def get_channel_data(name):
 def get_dm_convo_name(name1, name2):
     sorted_names = sorted([name1, name2])
     return sorted_names[0] + ";" + sorted_names[1]
-
-def dm_data_response_event(data):
-    return json.dumps(["dm_data_res", {"data": data}])
 
 # Generates the data object that a user gets upon login
 def login_data_event(user: dict):
@@ -224,6 +227,13 @@ async def messages(websocket):
         if req_type == "direct_message_req":
             convo_name = get_dm_convo_name(req_body["from"], req_body["to"])
 
+            # Validate they are actually friends
+            recipient_friends = db.users.find_one({"username": req_body["to"]}, ["friends"]).get("friends")
+            if recipient_friends:
+                if req_body["from"] not in recipient_friends:
+                    continue
+
+
             # Add message to DB
             db.dm_convos.update_one(
                 {"convo": convo_name}, 
@@ -237,7 +247,23 @@ async def messages(websocket):
             out = [CLIENTS.get(name) for name in [req_body["from"], req_body["to"]] if CLIENTS.get(name)]
             websockets.broadcast(out, message)
             continue
+        
+        if req_type == "friend_request_req":
+            # Check if the recipient has the sender blocked
+            block_list = db.users.find_one({"username": req_body["to"]}, ["blocked"]).get("blocked")
+            if block_list and (req_body["from"] in block_list):
+                continue
 
+            # User is not blocked at this point
+            # Forward the request if recipient online, and store in DB
+            recipient_sock = CLIENTS.get(req_body["to"])
+            if recipient_sock:
+                await recipient_sock.send(friend_request_event(req_body["from"], req_body["to"]))
+            
+            db.users.update_one(
+                {"username": req_body["to"]}, 
+                {"$push": {"incoming_friend_reqs": req_body["from"]}}
+            )
     
     print("Connection closed.")
     # Logout if logged in

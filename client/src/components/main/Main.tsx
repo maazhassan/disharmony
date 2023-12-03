@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserGroup } from "@fortawesome/free-solid-svg-icons/faUserGroup";
 import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
 import TextChannels from "./leftbar/TextChannels";
-import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, MainSocketEvents, MessageBase, User, UserUpdate } from "../../types/websocket.types";
+import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, MainSocketEvents, MessageBase, User, UserUpdate } from "../../types/websocket.types";
 import Friends from "./leftbar/Friends";
 
 const Main = () => {
@@ -32,6 +32,7 @@ const Main = () => {
   const isUserUpdate = (event: MainSocketEvents): event is UserUpdate => event[0] === "user_update";
   const isDMData = (event: MainSocketEvents): event is DirectMessageDataResponse => event[0] === "dm_data_res";
   const isDMMessage = (event: MainSocketEvents): event is DirectMessageRequest => event[0] === "direct_message_req";
+  const isFriendReq = (event: MainSocketEvents): event is FriendRequest => event[0] === "friend_request_req";
 
   const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
     share: true,
@@ -86,6 +87,17 @@ const Main = () => {
             [
               ...selectedFriendMessages,
               { from: directMessage.from, message: directMessage.message }
+            ]
+          );
+        }
+      }
+      else if (isFriendReq(event)) {
+        const sender = event[1].from
+        if (!friendRequests.includes(sender)) {
+          setFriendRequests(
+            [
+              ...friendRequests,
+              sender
             ]
           );
         }
@@ -157,7 +169,7 @@ const Main = () => {
   }
 
   const onKick = (user: string) => {
-    console.log('kick ' + user)
+    console.log('kick ' + user);
   }
 
   const onBan = (user: string) => {
@@ -165,7 +177,17 @@ const Main = () => {
   }
 
   const onFriendReq = (to: string) => {
-    console.log('friend req ' + to)
+    // console.log('friend req ' + to)
+    if (!friends.includes(to)) {
+      const friendReq: FriendRequest = [
+        "friend_request_req",
+        {
+          from: username,
+          to: to
+        }
+      ];
+      sendJsonMessage(friendReq);
+    }
   }
 
   const onBlock = (to: string) => {
