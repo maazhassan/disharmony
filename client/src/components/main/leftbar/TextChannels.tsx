@@ -32,7 +32,7 @@ const TextChannels = ({ channels, selected, userType, onSelect }: TextChannelsPr
     <>
       <h2
         className="text-channels-h2 hover:cursor-default"
-        onContextMenu={(e) => show({event: e})}
+        onContextMenu={e => show({event: e})}
       >
         Text Channels
       </h2>

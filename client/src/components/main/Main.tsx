@@ -191,6 +191,8 @@ const Main = () => {
         <UserList 
           selectedUsers={selectedChannel ? new Set(selectedChannelUsers) : new Set([selectedFriend])}
           users={users}
+          userType={USER_TYPE}
+          username={username}
         />
       </div>
     </div>
