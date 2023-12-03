@@ -34,6 +34,9 @@ def dm_data_response_event(data):
 def friend_request_event(_from, to):
     return json.dumps(["friend_request_req", {"from": _from, "to": to}])
 
+def leave_channel_event(_from, channel):
+    return json.dumps(["leave_channel_req", {"from": _from, "channel": channel}])
+
 def get_channel_data(name):
     channel = db.channels.find_one({"name": name})
     messages = channel.get("messages")
@@ -74,10 +77,10 @@ def login_data_event(user: dict):
         channel_names = user.get("channels") if user.get("channels") else []
 
     # Initial data if the user is in at least one channel
-    if len(user["channels"]) == 0:
-        initial_data = {"name": "none","users": [],"messages": []}
+    if len(channel_names) == 0:
+        initial_data = {"name": "none", "users": [], "messages": []}
     else:
-        initial_data = get_channel_data(user["channels"][0])
+        initial_data = get_channel_data(channel_names[0])
 
     # Serialize
     return json.dumps([
@@ -175,6 +178,35 @@ async def register(username, password, websocket):
         websockets.broadcast(CLIENTS.values(), user_update_event(username, False, "USER"))
     else:
         await websocket.send(register_response_event(False))
+
+def remove_user_from_channel(user, channel):
+    # Admins cannot leave channels
+    leave_user = db.users.find_one({"username": user}, ["type"])
+    if leave_user and leave_user["type"] == "ADMIN":
+        return
+
+    # Get the list of users in the channel if it exists
+    leave_chan = db.channels.find_one({"name": channel}, ["users"])
+    if not leave_chan:
+        return
+    
+    leave_chan_users = leave_chan["users"]
+
+    # Remove the channel from the user's channels list
+    db.users.update_one(
+        {"username": user},
+        {"$pull": {"channels": channel}}
+    )
+
+    # Remove the user from the channel's user list
+    db.channels.update_one(
+        {"name": channel},
+        {"$pull": {"users": user}}
+    )
+
+    # Broadcast the user leaving to everyone in the channel
+    out = [CLIENTS.get(u) for u in leave_chan_users if CLIENTS.get(u)]
+    websockets.broadcast(out, leave_channel_event(user, channel))
         
 
 async def messages(websocket):
@@ -211,6 +243,15 @@ async def messages(websocket):
             continue
 
         if req_type == "channel_message_req":
+            # Check if channel exists
+            message_chan = db.channels.find_one({"name": req_body["channel"]})
+            if not message_chan:
+                continue
+
+            # Check if user is actually in channel
+            if username not in message_chan["users"]:
+                continue
+
             # Add message to DB
             db.channels.update_one(
                 {"name": req_body["channel"]}, 
@@ -416,6 +457,10 @@ async def messages(websocket):
             if username in join_chan["users"]:
                 continue
 
+            # Check if user is banned
+            if join_chan.get("banned") and username in join_chan["banned"]:
+                continue
+
             # Add user to channel in DB
             db.channels.update_one(
                 {"name": req_body["channel"]},
@@ -426,38 +471,28 @@ async def messages(websocket):
                 {"$push": {"channels": req_body["channel"]}}
             )
 
-            # Broadcast the user leaving to everyone who is in the channel
+            # Broadcast the user joining to everyone who is in the channel
             out = [CLIENTS.get(u) for u in join_chan["users"] if CLIENTS.get(u)]
             out.append(websocket)
             websockets.broadcast(out, message)
             continue
 
         if req_type == "leave_channel_req":
-            # Admins cannot leave channels
-            if websocket in ADMIN_SET:
-                continue
+            remove_user_from_channel(username, req_body["channel"])
+            continue
 
-            # Get the list of users in the channel if it exists
-            leave_chan = db.channels.find_one({"name": req_body["channel"]}, ["users"])
-            if not leave_chan:
-                continue
-            
-            leave_chan_users = leave_chan["users"]
+        if req_type == "kick_req":
+            remove_user_from_channel(req_body["user"], req_body["channel"])
+            continue
 
-            # Remove the channel from the channels list
-            db.users.update_one(
-                {"username": username},
-                {"$pull": {"channels": req_body["channel"]}}
-            )
+        if req_type == "ban_req":
+            remove_user_from_channel(req_body["user"], req_body["channel"])
 
-            # Remove the user from the channel's user list
+            # Add user to channel's banned list
             db.channels.update_one(
                 {"name": req_body["channel"]},
-                {"$pull": {"users": username}}
+                {"$push": {"banned": req_body["user"]}}
             )
-
-            out = [CLIENTS.get(u) for u in leave_chan_users if CLIENTS.get(u)]
-            websockets.broadcast(out, message)
             continue
     
     print("Connection closed.")

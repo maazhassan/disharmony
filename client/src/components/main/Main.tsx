@@ -5,7 +5,7 @@ import UserList from "./rightbar/UserList";
 import { useAppData } from "../App";
 import "./main.css";
 import TextChannels from "./leftbar/TextChannels";
-import { BlockRequest, ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DeleteChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, JoinChannelRequest, LeaveChannelRequest, MainSocketEvents, MessageBase, RemoveFriend, UnblockRequest, UserUpdate } from "../../types/websocket.types";
+import { BanRequest, BlockRequest, ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DeleteChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, JoinChannelRequest, KickRequest, LeaveChannelRequest, MainSocketEvents, MessageBase, RemoveFriend, UnbanRequest, UnblockRequest, UserUpdate } from "../../types/websocket.types";
 import Friends from "./leftbar/Friends";
 import Header from "./topbar/Header";
 
@@ -227,11 +227,36 @@ const Main = () => {
   }
 
   const onKick = (user: string) => {
-    console.log('kick ' + user);
+    const kickRequest: KickRequest = [
+      "kick_req",
+      {
+        user: user,
+        channel: selectedChannel
+      }
+    ];
+    sendJsonMessage(kickRequest);
   }
 
   const onBan = (user: string) => {
-    console.log('ban ' + user)
+    const banRequest: BanRequest = [
+      "ban_req",
+      {
+        user: user,
+        channel: selectedChannel
+      }
+    ];
+    sendJsonMessage(banRequest);
+  }
+
+  const onUnban = (user: string) => {
+    const banRequest: UnbanRequest = [
+      "unban_req",
+      {
+        user: user,
+        channel: selectedChannel
+      }
+    ];
+    sendJsonMessage(banRequest);
   }
 
   const onSendFriendReq = (to: string) => {

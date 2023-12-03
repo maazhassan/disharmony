@@ -81,7 +81,8 @@ db.channels.insertMany([
   },
   {
     name: 'Another One Part 2',
-    users: ['Admin', 'OtherAdmin']
+    users: ['Admin', 'OtherAdmin'],
+    banned: ['Adele']
   }
 ]);
 

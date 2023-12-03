@@ -179,6 +179,14 @@ export type BanRequest = [
   }
 ];
 
+export type UnbanRequest = [
+  "unban_req",
+  {
+    user: string,
+    channel: string
+  }
+];
+
 export type BlockRequest = [
   "block_req",
   {
