@@ -7,6 +7,7 @@ type TextChannelsProps = {
   selected: string,
   userType: string,
   onSelect: (channel: string) => void,
+  onUnselect: () => void,
   onCreateChannel: (name: string) => void,
   onDeleteChannel: (name: string) => void,
   onJoinChannel: (name: string) => void,
@@ -20,6 +21,7 @@ channels,
 selected,
 userType,
 onSelect,
+onUnselect,
 onCreateChannel,
 onLeaveChannel,
 onJoinChannel,
@@ -70,6 +72,15 @@ onDeleteChannel
     }
   }
 
+  const onClick = (channel: string) => {
+    if (channel === selected) {
+      onUnselect();
+    }
+    else {
+      onSelect(channel);
+    }
+  }
+
   return (
     <>
       <h2
@@ -96,8 +107,8 @@ onDeleteChannel
             }
           >
             <div
-              className={`${selected === channel ? "text-app-pink" : "text-white"} text-xl font-medium hover:cursor-pointer indent-5 pt-2`}
-              onClick={() => onSelect(channel)}
+              className={`${selected === channel ? "text-app-pink" : "text-white"} text-xl font-medium hover:cursor-pointer indent-5 pt-2 select-none`}
+              onClick={() => onClick(channel)}
             >
               {channel}
             </div>

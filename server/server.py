@@ -420,7 +420,7 @@ async def messages(websocket):
                 {"$push": {"channels": req_body["channel"]}}
             )
 
-            # Broadcast the deletion to everyone who is in the channel
+            # Broadcast the user leaving to everyone who is in the channel
             out = [CLIENTS.get(u) for u in join_chan["users"] if CLIENTS.get(u)]
             out.append(websocket)
             websockets.broadcast(out, message)

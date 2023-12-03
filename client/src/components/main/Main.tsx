@@ -182,6 +182,7 @@ const Main = () => {
     sendJsonMessage(channelDataReq);
   }
 
+  
   const onSelectFriend = (friend: string) => {
     setSelectedFriend(friend);
     setSelectedChannel("");
@@ -195,6 +196,11 @@ const Main = () => {
     sendJsonMessage(dmDataReq);
   }
 
+  const onUnselect = () => {
+    setSelectedFriend("");
+    setSelectedChannel("");
+  }
+  
   const onSendMessage = (message: string) => {
     if (selectedChannel) {
       const channelMessageReq: ChannelMessageRequest = [
@@ -207,7 +213,7 @@ const Main = () => {
       ];
       sendJsonMessage(channelMessageReq);
     }
-    else {
+    else if (selectedFriend) {
       const directMessageRequest: DirectMessageRequest = [
         "direct_message_req",
         {
@@ -350,6 +356,7 @@ const Main = () => {
             selected={selectedChannel}
             userType={USER_TYPE}
             onSelect={onSelectChannel}
+            onUnselect={onUnselect}
             onCreateChannel={onCreateChannel}
             onLeaveChannel={onLeaveChannel}
             onJoinChannel={onJoinChannel}
@@ -360,6 +367,7 @@ const Main = () => {
             users={users}
             selected={selectedFriend}
             onSelect={onSelectFriend}
+            onUnselect={onUnselect}
             onRemoveFriend={onRemoveFriend}
           />
         </div>
@@ -380,6 +388,7 @@ const Main = () => {
           username={username}
           friends={friends}
           blocked={blockedUsers}
+          selectedFriend={selectedFriend}
           onKick={onKick}
           onBan={onBan}
           onBlock={onBlock}

@@ -10,6 +10,7 @@ type UserListProps = {
   username: string,
   friends: string[],
   blocked: string[],
+  selectedFriend: string,
   onKick: (user: string) => void,
   onBan: (user: string) => void,
   onFriendReq: (to: string) => void,
@@ -23,6 +24,7 @@ userType,
 username,
 friends,
 blocked,
+selectedFriend,
 onKick,
 onBan,
 onFriendReq,
@@ -51,7 +53,7 @@ onBlock
         <li 
           key={idx}
           onContextMenu={
-            user.username === username ? 
+            (user.username === username || user.username === selectedFriend) ? 
             e => e.preventDefault() : 
             e => displayMenu(e, user.username)
           }

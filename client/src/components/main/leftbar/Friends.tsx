@@ -8,10 +8,11 @@ type FriendsProps = {
   users: User[],
   selected: string,
   onSelect: (channel: string) => void,
+  onUnselect: () => void,
   onRemoveFriend: (friend: string) => void
 }
 
-const Friends = ({ friends, users, selected, onSelect, onRemoveFriend }: FriendsProps) => {
+const Friends = ({ friends, users, selected, onSelect, onUnselect, onRemoveFriend }: FriendsProps) => {
   const MENU_ID = "friend-menu";
 
   const [contextFriend, setContextFriend] = useState("");
@@ -25,6 +26,16 @@ const Friends = ({ friends, users, selected, onSelect, onRemoveFriend }: Friends
     show({event: e});
   }
 
+  const onClick = (friend: string) => {
+    if (friend === selected) {
+      onUnselect();
+    }
+    else {
+      onSelect(friend);
+    }
+  }
+
+
   return (
     <div className="flex-grow overflow-auto">
       <h3 className="text-white text-xl indent-5 font-medium border-t-2 border-black border-solid py-2">Friends</h3>
@@ -32,7 +43,7 @@ const Friends = ({ friends, users, selected, onSelect, onRemoveFriend }: Friends
       {users.filter(user => friends.has(user.username)).map((user, idx) =>
         <li
           key={idx}
-          onClick={() => onSelect(user.username)}
+          onClick={() => onClick(user.username)}
           onContextMenu={e => displayMenu(e, user.username)}
         >
           <UserCard 
