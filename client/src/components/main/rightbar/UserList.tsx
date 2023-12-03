@@ -4,11 +4,9 @@ import UserCard from "../common/UserCard";
 type UserListProps = {
   selectedUsers: Set<string>,
   users: User[],
-  selected: string
-  onSelect: (user: string) => void
 }
 
-const UserList = ({ selectedUsers, users, selected, onSelect }: UserListProps) => {
+const UserList = ({ selectedUsers, users }: UserListProps) => {
   return (
     <div className="w-[15%] bg-modal-color"> 
       <h2 className="users-channel-h2">Users</h2>
@@ -18,9 +16,7 @@ const UserList = ({ selectedUsers, users, selected, onSelect }: UserListProps) =
           <UserCard 
             name={user.username}
             online={user.online}
-            selected={selected === user.username}
-            onSelect={user => onSelect(user)}
-            className="ml-6 mt-2"
+            className="ml-6 mt-2 text-white"
           />
         </li>
       )}

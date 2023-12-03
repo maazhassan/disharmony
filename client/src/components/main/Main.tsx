@@ -21,7 +21,6 @@ const Main = () => {
   const [selectedChannelMessages, setSelectedChannelMessages] = useState(data.general_data.messages);
   const [selectedFriend, setSelectedFriend] = useState("");
   const [selectedFriendMessages, setSelectedFriendMessages] = useState<MessageBase[]>([]);
-  const [selectedUser, setSelectedUser] = useState("");
   const [blockedUsers, setBlockedUsers] = useState(data.blocked_users);
   const [friends, setFriends] = useState(data.friends);
   const [friendRequests, setFriendRequests] = useState(data.friend_requests);
@@ -132,10 +131,6 @@ const Main = () => {
     sendJsonMessage(dmDataReq);
   }
 
-  const onSelectUser = (user: string) => {
-    setSelectedUser(user);
-  }
-
   const onSendMessage = (message: string) => {
     if (selectedChannel) {
       const channelMessageReq: ChannelMessageRequest = [
@@ -196,8 +191,6 @@ const Main = () => {
         <UserList 
           selectedUsers={selectedChannel ? new Set(selectedChannelUsers) : new Set([selectedFriend])}
           users={users}
-          selected={selectedUser}
-          onSelect={user => onSelectUser(user)}
         />
       </div>
     </div>
