@@ -6,7 +6,7 @@ import { useAppData } from "../App";
 import "./main.css";
 import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
 import TextChannels from "./leftbar/TextChannels";
-import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, MainSocketEvents, MessageBase, User, UserUpdate } from "../../types/websocket.types";
+import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, MainSocketEvents, MessageBase, User, UserUpdate } from "../../types/websocket.types";
 import Friends from "./leftbar/Friends";
 import Header from "./topbar/Header";
 
@@ -32,6 +32,7 @@ const Main = () => {
   const isDMData = (event: MainSocketEvents): event is DirectMessageDataResponse => event[0] === "dm_data_res";
   const isDMMessage = (event: MainSocketEvents): event is DirectMessageRequest => event[0] === "direct_message_req";
   const isFriendReq = (event: MainSocketEvents): event is FriendRequest => event[0] === "friend_request_req";
+  const isFriendReqRes = (event: MainSocketEvents): event is FriendRequestResponse => event[0] === "friend_request_res";
 
   const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
     share: true,
@@ -101,6 +102,10 @@ const Main = () => {
           );
         }
       }
+      else if (isFriendReqRes(event)) {
+        const newFriend = event[1].from === username ? event[1].to : event[1].from;
+        setFriends([...friends, newFriend]);
+      }
     },
     filter: m => {
       const event = JSON.parse(m.data);
@@ -109,7 +114,10 @@ const Main = () => {
         req_type === "channel_data_res" ||
         req_type === "channel_message_req" ||
         req_type === "user_update" ||
-        req_type === "dm_data_res"
+        req_type === "dm_data_res" ||
+        req_type === "direct_message_req" ||
+        req_type === "friend_request_req" ||
+        req_type === "friend_request_res"
       );
     }
   });
@@ -172,8 +180,7 @@ const Main = () => {
     console.log('ban ' + user)
   }
 
-  const onFriendReq = (to: string) => {
-    // console.log('friend req ' + to)
+  const onSendFriendReq = (to: string) => {
     if (!friends.includes(to)) {
       const friendReq: FriendRequest = [
         "friend_request_req",
@@ -185,6 +192,19 @@ const Main = () => {
       sendJsonMessage(friendReq);
     }
   }
+  
+  const onRespondFriendReq = (to: string, accepted: boolean) => {
+    setFriendRequests(friendRequests.filter(f => f !== to));
+    const friendReqRes: FriendRequestResponse = [
+      "friend_request_res",
+      {
+        from: username,
+        to: to,
+        accepted: accepted
+      }
+    ];
+    sendJsonMessage(friendReqRes);
+  }
 
   const onBlock = (to: string) => {
     console.log('block ' + to)
@@ -194,6 +214,7 @@ const Main = () => {
     <div className="flex flex-col h-screen">
       <Header 
         friendRequests={friendRequests}
+        onRespond={onRespondFriendReq}
       />
 
       <div className="cols-box">
@@ -226,10 +247,12 @@ const Main = () => {
           users={users}
           userType={USER_TYPE}
           username={username}
+          friends={friends}
+          blocked={blockedUsers}
           onKick={onKick}
           onBan={onBan}
           onBlock={onBlock}
-          onFriendReq={onFriendReq}
+          onFriendReq={onSendFriendReq}
         />
       </div>
     </div>

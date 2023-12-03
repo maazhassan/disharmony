@@ -21,7 +21,7 @@ const Friends = ({ friends, users, selected, onSelect }: FriendsProps) => {
           <UserCard 
             name={user.username}
             online={user.online}
-            className={`ml-6 ${selected ? "text-app-pink" : "text-white"}`}
+            className={`ml-6 ${selected === user.username ? "text-app-pink" : "text-white"}`}
           />
         </li>
       )}

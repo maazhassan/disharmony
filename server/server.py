@@ -220,7 +220,11 @@ async def messages(websocket):
 
         if req_type == "dm_data_req":
             convo_name = get_dm_convo_name(req_body["from"], req_body["friend"])
-            convo_messages = db.dm_convos.find_one({"convo": convo_name}, ["messages"])["messages"]
+            convo_messages = db.dm_convos.find_one({"convo": convo_name}, ["messages"])
+            if not convo_messages:
+                convo_messages = []
+            else:
+                convo_messages = convo_messages["messages"]
             await websocket.send(dm_data_response_event(convo_messages))
             continue
 
@@ -233,14 +237,14 @@ async def messages(websocket):
                 if req_body["from"] not in recipient_friends:
                     continue
 
-
             # Add message to DB
             db.dm_convos.update_one(
                 {"convo": convo_name}, 
                 {"$push": {"messages": {
                     "from": req_body["from"],
                     "message": req_body["message"]
-                }}}
+                }}},
+                upsert=True
             )
 
             # Broadcast the message to the two people involved
@@ -249,12 +253,20 @@ async def messages(websocket):
             continue
         
         if req_type == "friend_request_req":
-            # Check if the recipient has the sender blocked
+            # Check if one person has the other blocked
             block_list = db.users.find_one({"username": req_body["to"]}, ["blocked"]).get("blocked")
             if block_list and (req_body["from"] in block_list):
                 continue
 
-            # User is not blocked at this point
+            block_list = db.users.find_one({"username": req_body["from"]}, ["blocked"]).get("blocked")
+            if block_list and (req_body["to"] in block_list):
+                continue
+
+            # Check if they are already friends
+            friend_list = db.users.find_one({"username": req_body["to"]}, ["friends"]).get("friends")
+            if friend_list and (req_body["from"] in friend_list):
+                continue
+
             # Forward the request if recipient online, and store in DB
             recipient_sock = CLIENTS.get(req_body["to"])
             if recipient_sock:
@@ -264,6 +276,35 @@ async def messages(websocket):
                 {"username": req_body["to"]}, 
                 {"$push": {"incoming_friend_reqs": req_body["from"]}}
             )
+            continue
+        
+        if req_type == "friend_request_res":
+            # Check if user is blocked
+            block_list = db.users.find_one({"username": req_body["to"]}, ["blocked"]).get("blocked")
+            if block_list and (req_body["from"] in block_list):
+                continue
+
+            if req_body["accepted"]:
+                # Add friends in the DB
+                db.users.update_one(
+                    {"username": req_body["to"]}, 
+                    {"$push": {"friends": req_body["from"]}}
+                )
+                db.users.update_one(
+                    {"username": req_body["from"]}, 
+                    {"$push": {"friends": req_body["to"]}}
+                )
+
+                # Broadcast result to both clients if online
+                out = [CLIENTS.get(name) for name in [req_body["from"], req_body["to"]] if CLIENTS.get(name)]
+                websockets.broadcast(out, message)
+            
+            # Remove incoming friend request
+            db.users.update_one(
+                {"username": req_body["from"]}, 
+                {"$pull": {"incoming_friend_reqs": req_body["to"]}}
+            )
+            continue
     
     print("Connection closed.")
     # Logout if logged in

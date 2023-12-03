@@ -8,6 +8,8 @@ type UserListProps = {
   users: User[],
   userType: string,
   username: string,
+  friends: string[],
+  blocked: string[],
   onKick: (user: string) => void,
   onBan: (user: string) => void,
   onFriendReq: (to: string) => void,
@@ -18,7 +20,9 @@ const UserList = ({
 selectedUsers,
 users,
 userType,
-username ,
+username,
+friends,
+blocked,
 onKick,
 onBan,
 onFriendReq,
@@ -72,13 +76,19 @@ onBlock
         }
         {
           userType === "USER" &&
+          !friends.includes(selectedUser) &&
+          !blocked.includes(selectedUser) &&
           <Item onClick={() => onBlock(selectedUser)}>
             Block User
           </Item>
         }
-        <Item onClick={() => onFriendReq(selectedUser)}>
-          Friend Request
-        </Item>
+        {
+          !friends.includes(selectedUser) &&
+          !blocked.includes(selectedUser) &&
+          <Item onClick={() => onFriendReq(selectedUser)}>
+            Friend Request
+          </Item>
+        }
       </Menu>
     </div>
   )
