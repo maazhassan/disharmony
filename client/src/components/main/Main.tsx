@@ -4,12 +4,11 @@ import MessageWindow from "./messagewindow/MessageWindow";
 import UserList from "./rightbar/UserList";
 import { useAppData } from "../App";
 import "./main.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserGroup } from "@fortawesome/free-solid-svg-icons/faUserGroup";
 import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
 import TextChannels from "./leftbar/TextChannels";
 import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, MainSocketEvents, MessageBase, User, UserUpdate } from "../../types/websocket.types";
 import Friends from "./leftbar/Friends";
+import Header from "./topbar/Header";
 
 const Main = () => {
   const { username, loginData } = useAppData();
@@ -115,9 +114,6 @@ const Main = () => {
     }
   });
 
-  
-
-
   const onSelectChannel = (channel: string) => {
     setSelectedChannel(channel);
     setSelectedFriend("");
@@ -196,10 +192,9 @@ const Main = () => {
 
   return (
     <div className="flex flex-col h-screen">
-      <div className="title-box">
-        <h2 className="disharmony-title">Disharmony</h2>
-        <FontAwesomeIcon icon={faUserGroup} className="friends-icon"/>
-      </div>
+      <Header 
+        friendRequests={friendRequests}
+      />
 
       <div className="cols-box">
         <div className="w-[15%] bg-modal-color flex flex-col">
