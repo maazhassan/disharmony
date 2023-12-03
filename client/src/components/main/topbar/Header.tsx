@@ -8,14 +8,17 @@ type HeaderProps = {
   friendRequests: string[],
   blocked: string[],
   onRespond: (to: string, accepted: boolean) => void,
-  onUnblock: (to: string) => void
+  onUnblock: (to: string) => void,
+  onFriendReq: (to: string) => void,
+  onBlock: (to: string) => void
 }
 
 ReactModal.setAppElement("#root");
 
-const Header = ({ friendRequests, blocked, onRespond, onUnblock }: HeaderProps) => {
+const Header = ({ friendRequests, blocked, onRespond, onUnblock, onFriendReq, onBlock }: HeaderProps) => {
   const [fmodalIsOpen, setFModalIsOpen] = useState(false);
   const [bmodalIsOpen, setBModalIsOpen] = useState(false);
+  const [inputText, setInputText] = useState("");
 
   const openFModal = () => {
     setFModalIsOpen(true);
@@ -23,6 +26,7 @@ const Header = ({ friendRequests, blocked, onRespond, onUnblock }: HeaderProps) 
 
   const closeFModal = () => {
     setFModalIsOpen(false);
+    setInputText("");
   }
 
   const openBModal = () => {
@@ -31,6 +35,24 @@ const Header = ({ friendRequests, blocked, onRespond, onUnblock }: HeaderProps) 
 
   const closeBModal = () => {
     setBModalIsOpen(false);
+    setInputText("");
+  }
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputText(e.currentTarget.value);
+  }
+
+  const onKeyDown = (e: React.KeyboardEvent, type: string) => {
+    if (e.key == "Enter") {
+      if (type === "friend") {
+        onFriendReq(inputText);
+        setInputText("");
+      }
+      else if (type === "block") {
+        onBlock(inputText);
+        setInputText("");
+      }
+    }
   }
 
   return (
@@ -53,10 +75,10 @@ const Header = ({ friendRequests, blocked, onRespond, onUnblock }: HeaderProps) 
       <ReactModal
         isOpen={fmodalIsOpen}
         onRequestClose={closeFModal}
-        className={"fixed w-80 h-[28rem] bg-bg-color rounded-md outline-none top-10 right-16"}
+        className={"fixed w-80 h-[30rem] bg-bg-color rounded-md outline-none top-10 right-16"}
         overlayClassName={"fixed top-0 left-0 right-0 bottom-0 bg-white/10"}
       >
-        <ul className="h-[87%] overflow-auto">
+        <ul className="h-[79%] overflow-auto">
           <li className="flex flex-row justify-center text-white text-xl font-medium mt-2">Friend Requests</li>
           {friendRequests.map((user, idx) =>
             <li key={idx} className="flex flex-row justify-center">
@@ -76,6 +98,13 @@ const Header = ({ friendRequests, blocked, onRespond, onUnblock }: HeaderProps) 
             </li>
           )}
         </ul>
+        <input
+          className="absolute bottom-14 right-0 left-0 w-fit mx-auto bg-text-input-bg focus:outline-none rounded text-white py-1 px-1"
+          placeholder="Search..."
+          onKeyDown={e => onKeyDown(e, "friend")}
+          onChange={e => onChange(e)}
+          value={inputText}
+        />
         <button
           onClick={closeFModal}
           className="absolute bottom-3 right-0 left-0 w-fit mx-auto py-1 px-8 bg-app-pink text-white border-none rounded font-semibold hover:cursor-pointer"
@@ -86,10 +115,10 @@ const Header = ({ friendRequests, blocked, onRespond, onUnblock }: HeaderProps) 
       <ReactModal
         isOpen={bmodalIsOpen}
         onRequestClose={closeBModal}
-        className={"fixed w-80 h-[28rem] bg-bg-color rounded-md outline-none top-10 right-28"}
+        className={"fixed w-80 h-[30rem] bg-bg-color rounded-md outline-none top-10 right-28"}
         overlayClassName={"fixed top-0 left-0 right-0 bottom-0 bg-white/10"}
       >
-        <ul className="h-[87%] overflow-auto">
+        <ul className="h-[79%] overflow-auto">
           <li className="flex flex-row justify-center text-white text-xl font-medium mt-2">Blocked Users</li>
           {blocked.map((user, idx) =>
             <li key={idx} className="flex flex-row justify-center">
@@ -104,6 +133,13 @@ const Header = ({ friendRequests, blocked, onRespond, onUnblock }: HeaderProps) 
             </li>
           )}
         </ul>
+        <input
+          className="absolute bottom-14 right-0 left-0 w-fit mx-auto bg-text-input-bg focus:outline-none rounded text-white py-1 px-1"
+          placeholder="Search..."
+          onKeyDown={e => onKeyDown(e, "friend")}
+          onChange={e => onChange(e)}
+          value={inputText}
+        />
         <button
           onClick={closeBModal}
           className="absolute bottom-3 right-0 left-0 w-fit mx-auto py-1 px-8 bg-app-pink text-white border-none rounded font-semibold hover:cursor-pointer"

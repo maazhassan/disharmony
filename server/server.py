@@ -253,6 +253,10 @@ async def messages(websocket):
             continue
         
         if req_type == "friend_request_req":
+            # Check if user exists
+            if not db.users.find_one({"username": req_body["to"]}):
+                continue
+
             # Check if one person has the other blocked
             block_list = db.users.find_one({"username": req_body["to"]}, ["blocked"]).get("blocked")
             if block_list and (req_body["from"] in block_list):
@@ -332,7 +336,7 @@ async def messages(websocket):
             # Add user to blocked list
             db.users.update_one(
                 {"username": req_body["from"]},
-                {"$push": {"blocked": req_body["to"]}}
+                {"$addToSet": {"blocked": req_body["to"]}}
             )
             continue
         

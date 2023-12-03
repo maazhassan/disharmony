@@ -259,6 +259,8 @@ const Main = () => {
         blocked={blockedUsers}
         onRespond={onRespondFriendReq}
         onUnblock={onUnblock}
+        onBlock={onBlock}
+        onFriendReq={onSendFriendReq}
       />
 
       <div className="cols-box">
