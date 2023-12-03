@@ -139,6 +139,14 @@ export type FriendRequestResponse = [
   }
 ];
 
+export type RemoveFriend = [
+  "remove_friend",
+  {
+    user1: string,
+    user2: string
+  }
+]
+
 export type KickRequest = [
   "kick_req",
   {
@@ -178,4 +186,5 @@ export type MainSocketEvents =
   DirectMessageDataResponse |
   DirectMessageRequest |
   FriendRequest |
-  FriendRequestResponse;
+  FriendRequestResponse |
+  RemoveFriend;

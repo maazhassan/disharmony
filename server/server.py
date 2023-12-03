@@ -305,6 +305,22 @@ async def messages(websocket):
                 {"$pull": {"incoming_friend_reqs": req_body["to"]}}
             )
             continue
+        
+        if req_type == "remove_friend":
+            # Remove from DB
+            db.users.update_one(
+                {"username": req_body["user1"]}, 
+                {"$pull": {"friends": req_body["user2"]}}
+            )
+            db.users.update_one(
+                {"username": req_body["user2"]}, 
+                {"$pull": {"friends": req_body["user1"]}}
+            )
+
+            # Broadcast message to both clients if online
+            out = [CLIENTS.get(name) for name in [req_body["user1"], req_body["user2"]] if CLIENTS.get(name)]
+            websockets.broadcast(out, message)
+            continue
     
     print("Connection closed.")
     # Logout if logged in

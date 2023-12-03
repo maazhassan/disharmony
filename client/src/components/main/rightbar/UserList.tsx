@@ -30,14 +30,14 @@ onBlock
 }: UserListProps) => {
   const MENU_ID = "user-card-menu";
 
-  const [selectedUser, setSelectedUser] = useState("");
+  const [contextUser, setContextUser] = useState("");
 
   const { show } = useContextMenu({
     id: MENU_ID
   });
 
   const displayMenu = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, name: string) => {
-    setSelectedUser(name);
+    setContextUser(name);
     show({event: e});
   }
 
@@ -66,26 +66,26 @@ onBlock
         {
           userType === "ADMIN" &&
           <>
-            <Item onClick={() => onKick(selectedUser)}>
+            <Item onClick={() => onKick(contextUser)}>
               Kick User
             </Item>
-            <Item onClick={() => onBan(selectedUser)}>
+            <Item onClick={() => onBan(contextUser)}>
               Ban User
             </Item>
           </>
         }
         {
           userType === "USER" &&
-          !friends.includes(selectedUser) &&
-          !blocked.includes(selectedUser) &&
-          <Item onClick={() => onBlock(selectedUser)}>
+          !friends.includes(contextUser) &&
+          !blocked.includes(contextUser) &&
+          <Item onClick={() => onBlock(contextUser)}>
             Block User
           </Item>
         }
         {
-          !friends.includes(selectedUser) &&
-          !blocked.includes(selectedUser) &&
-          <Item onClick={() => onFriendReq(selectedUser)}>
+          !friends.includes(contextUser) &&
+          !blocked.includes(contextUser) &&
+          <Item onClick={() => onFriendReq(contextUser)}>
             Friend Request
           </Item>
         }

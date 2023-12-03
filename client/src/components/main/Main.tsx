@@ -6,7 +6,7 @@ import { useAppData } from "../App";
 import "./main.css";
 import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
 import TextChannels from "./leftbar/TextChannels";
-import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, MainSocketEvents, MessageBase, User, UserUpdate } from "../../types/websocket.types";
+import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, MainSocketEvents, MessageBase, RemoveFriend, User, UserUpdate } from "../../types/websocket.types";
 import Friends from "./leftbar/Friends";
 import Header from "./topbar/Header";
 
@@ -33,6 +33,7 @@ const Main = () => {
   const isDMMessage = (event: MainSocketEvents): event is DirectMessageRequest => event[0] === "direct_message_req";
   const isFriendReq = (event: MainSocketEvents): event is FriendRequest => event[0] === "friend_request_req";
   const isFriendReqRes = (event: MainSocketEvents): event is FriendRequestResponse => event[0] === "friend_request_res";
+  const isRemoveFriend = (event: MainSocketEvents): event is RemoveFriend => event[0] === "remove_friend";
 
   const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
     share: true,
@@ -106,6 +107,14 @@ const Main = () => {
         const newFriend = event[1].from === username ? event[1].to : event[1].from;
         setFriends([...friends, newFriend]);
       }
+      else if (isRemoveFriend(event)) {
+        const friendToRemove = event[1].user1 === username ? event[1].user2 : event[1].user1;
+        setFriends(friends.filter(f => f !== friendToRemove));
+        if (selectedFriend === friendToRemove) {
+          setSelectedFriend("");
+          setSelectedChannel("General");
+        }
+      }
     },
     filter: m => {
       const event = JSON.parse(m.data);
@@ -117,7 +126,8 @@ const Main = () => {
         req_type === "dm_data_res" ||
         req_type === "direct_message_req" ||
         req_type === "friend_request_req" ||
-        req_type === "friend_request_res"
+        req_type === "friend_request_res" ||
+        req_type === "remove_friend"
       );
     }
   });
@@ -206,6 +216,17 @@ const Main = () => {
     sendJsonMessage(friendReqRes);
   }
 
+  const onRemoveFriend = (friend: string) => {
+    const removeFriend: RemoveFriend = [
+      "remove_friend",
+      {
+        user1: friend,
+        user2: username
+      }
+    ];
+    sendJsonMessage(removeFriend);
+  }
+
   const onBlock = (to: string) => {
     console.log('block ' + to)
   }
@@ -230,6 +251,7 @@ const Main = () => {
             users={users}
             selected={selectedFriend}
             onSelect={friend => onSelectFriend(friend)}
+            onRemoveFriend={onRemoveFriend}
           />
         </div>
 
