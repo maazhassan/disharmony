@@ -7,7 +7,9 @@ import {
   createBrowserRouter,
   RouterProvider
 } from 'react-router-dom'
+import "react-contexify/dist/ReactContexify.css";
 import './index.css'
+import Main from './components/main/Main.tsx'
 
 const router = createBrowserRouter([
   {
@@ -22,6 +24,10 @@ const router = createBrowserRouter([
         path: "create",
         element: <CreateAccount />
       },
+      {
+        path: "main",
+        element: <Main />
+      }
     ],
   },
 ]);

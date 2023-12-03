@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useAppData } from './App';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
 
+  const navigate = useNavigate();
   const { handleClickLogin, connectionStatus } = useAppData();
 
   return (
@@ -35,9 +37,12 @@ const Login = () => {
         </button>
         <div className="text-white mt-24">
           Don't have an account?&nbsp;
-          <a href="/create" className="text-app-pink underline hover:cursor-pointer hover:text-app-pink">
+          <span
+            className="text-app-pink underline hover:cursor-pointer hover:text-app-pink"
+            onClick={() => navigate("/create")}
+          >
             Click here!
-          </a>
+          </span>
         </div>
       </div>
     </div>

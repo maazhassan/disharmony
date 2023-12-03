@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useWebSocket } from "react-use-websocket/dist/lib/use-websocket";
-import { MessageWindowProps } from "./MessageWindow";
-import { DirectMessage } from "../../types/websocket.types";
+import { MessageWindowPropsOLD } from "./MessageWindow";
+import { DirectMessage } from "../../../types/websocket.types";
 
-interface MessageDisplayProps extends MessageWindowProps {}
+interface MessageDisplayProps extends MessageWindowPropsOLD {}
 
 
 
