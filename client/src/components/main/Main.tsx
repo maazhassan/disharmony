@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserGroup } from "@fortawesome/free-solid-svg-icons/faUserGroup";
 import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
 import TextChannels from "./leftbar/TextChannels";
-import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, MainSocketEvents, MessageBase, User, UserUpdate } from "../../types/websocket.types";
+import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, MainSocketEvents, MessageBase, User, UserUpdate } from "../../types/websocket.types";
 import Friends from "./leftbar/Friends";
 
 const Main = () => {
@@ -73,10 +73,7 @@ const Main = () => {
         }
         else {
           setUsers(
-            [
-              ...users.filter((_, i) => i !== useridx),
-              eventUser
-            ]
+            [...users.slice(0, useridx), eventUser, ...users.slice(useridx + 1)]
           );
         }
       }
@@ -106,6 +103,9 @@ const Main = () => {
       );
     }
   });
+
+  
+
 
   const onSelectChannel = (channel: string) => {
     setSelectedChannel(channel);
@@ -170,21 +170,18 @@ const Main = () => {
 
       <div className="cols-box">
         <div className="w-[15%] bg-modal-color flex flex-col">
-          <h2 className="text-channels-h2">Text Channels</h2>
-
           <TextChannels
             channels={channels}
             selected={selectedChannel}
+            userType={USER_TYPE}
             onSelect={channel => onSelectChannel(channel)}
           />
-
           <Friends
             friends={new Set(friends)}
             users={users}
             selected={selectedFriend}
             onSelect={friend => onSelectFriend(friend)}
           />
-
         </div>
 
         <MessageWindow 
