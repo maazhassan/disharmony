@@ -6,7 +6,7 @@ import { useAppData } from "../App";
 import "./main.css";
 import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
 import TextChannels from "./leftbar/TextChannels";
-import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, MainSocketEvents, MessageBase, RemoveFriend, User, UserUpdate } from "../../types/websocket.types";
+import { BlockRequest, ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, MainSocketEvents, MessageBase, RemoveFriend, User, UserUpdate } from "../../types/websocket.types";
 import Friends from "./leftbar/Friends";
 import Header from "./topbar/Header";
 
@@ -228,7 +228,16 @@ const Main = () => {
   }
 
   const onBlock = (to: string) => {
-    console.log('block ' + to)
+    setFriendRequests(friendRequests.filter(f => f !== to));
+    setBlockedUsers([...blockedUsers, to]);
+    const blockRequest: BlockRequest = [
+      "block_req",
+      {
+        from: username,
+        to: to
+      }
+    ];
+    sendJsonMessage(blockRequest);
   }
 
   return (

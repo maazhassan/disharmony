@@ -279,6 +279,12 @@ async def messages(websocket):
             continue
         
         if req_type == "friend_request_res":
+            # Remove incoming friend request
+            db.users.update_one(
+                {"username": req_body["from"]}, 
+                {"$pull": {"incoming_friend_reqs": req_body["to"]}}
+            )
+
             # Check if user is blocked
             block_list = db.users.find_one({"username": req_body["to"]}, ["blocked"]).get("blocked")
             if block_list and (req_body["from"] in block_list):
@@ -298,12 +304,6 @@ async def messages(websocket):
                 # Broadcast result to both clients if online
                 out = [CLIENTS.get(name) for name in [req_body["from"], req_body["to"]] if CLIENTS.get(name)]
                 websockets.broadcast(out, message)
-            
-            # Remove incoming friend request
-            db.users.update_one(
-                {"username": req_body["from"]}, 
-                {"$pull": {"incoming_friend_reqs": req_body["to"]}}
-            )
             continue
         
         if req_type == "remove_friend":
@@ -321,52 +321,24 @@ async def messages(websocket):
             out = [CLIENTS.get(name) for name in [req_body["user1"], req_body["user2"]] if CLIENTS.get(name)]
             websockets.broadcast(out, message)
             continue
+
+        if req_type == "block_req":
+            # Remove incoming friend requests from blocked person
+            db.users.update_one(
+                {"username": req_body["from"]}, 
+                {"$pull": {"incoming_friend_reqs": req_body["to"]}}
+            )
+
+            # Add user to blocked list
+            db.users.update_one(
+                {"username": req_body["from"]},
+                {"$push": {"blocked": req_body["to"]}}
+            )
     
     print("Connection closed.")
     # Logout if logged in
     if username:
         await logout(username, websocket)
-
-    #     # Check the name and register if unique
-    #     name = ""
-    #     name = await websocket.recv()
-    #     name = json.loads(name)["name"]
-    #     if (name in CLIENTS.keys()):
-    #         await websocket.send(register_event(-2))
-    #         print(f"Duplicate client {name}. Closing connection...")
-    #         name = ""
-    #         return
-        
-    #     print(f"Registering new client {name}.")
-    #     CLIENTS[name] = websocket
-    #     numClients += 1
-    #     print(f"{numClients} clients online.")
-    #     await websocket.send(register_event(currID))
-    #     ready = await websocket.recv()
-    #     ready = json.loads(ready)["ready"]
-    #     if (ready):
-    #         websockets.broadcast(CLIENTS.values(), users_event())
-    #     currID += 1
-        
-    #     # Listen to incoming messages
-    #     async for message in websocket:
-    #         print(f"recieved message from {name}: {message}")
-    #         out = [CLIENTS[name], CLIENTS[json.loads(message)["to"]]]
-    #         websockets.broadcast(out, message)
-    
-    # except websockets.exceptions.ConnectionClosedOK:
-    #     print("Connection closed without errors.")
-
-    # except websockets.exceptions.ConnectionClosedError:
-    #     print("Connection closed with an error.")
-        
-    # finally:
-    #     if (name in CLIENTS.keys()):
-    #         print(f"Client {name} has disconnected.")
-    #         CLIENTS.pop(name)
-    #         websockets.broadcast(CLIENTS.values(), users_event())
-    #         numClients -= 1
-    #     print(f"{numClients} clients online.")
 
 async def main():
     async with websockets.serve(messages, "localhost", 8000):
