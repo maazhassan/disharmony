@@ -31,6 +31,13 @@ def get_channel_data(name):
         "messages": messages
     }
 
+def get_dm_convo_name(name1, name2):
+    sorted_names = sorted([name1, name2])
+    return sorted_names[0] + ";" + sorted_names[1]
+
+def dm_data_response_event(data):
+    return json.dumps(["dm_data_res", {"data": data}])
+
 # Generates the data object that a user gets upon login
 def login_data_event(user: dict):
     # Get direct messages
@@ -206,6 +213,13 @@ async def messages(websocket):
             users_in_channel = db.channels.find_one({"name": req_body["channel"]}, ['users'])['users']
             out = [CLIENTS.get(name) for name in users_in_channel if CLIENTS.get(name)]
             websockets.broadcast(out, message)
+            continue
+
+        if req_type == "dm_data_req":
+            convo_name = get_dm_convo_name(req_body["from"], req_body["friend"])
+            convo_messages = db.dm_convos.find_one({"convo": convo_name}, ["messages"])["messages"]
+            await websocket.send(dm_data_response_event(convo_messages))
+            continue
 
     
     print("Connection closed.")

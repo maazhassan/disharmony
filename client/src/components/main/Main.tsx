@@ -8,19 +8,19 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserGroup } from "@fortawesome/free-solid-svg-icons/faUserGroup";
 import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
 import TextChannels from "./leftbar/TextChannels";
-import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, MainSocketEvents, MessageBase, User, UserUpdate } from "../../types/websocket.types";
+import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, DirectMessageDataRequest, DirectMessageDataResponse, MainSocketEvents, MessageBase, User, UserUpdate } from "../../types/websocket.types";
 import Friends from "./leftbar/Friends";
 
 const Main = () => {
   const { username, loginData } = useAppData();
   const data = loginData[1];
+  const USER_TYPE = data.user_type;
 
   const [selectedChannel, setSelectedChannel] = useState("General");
   const [selectedChannelUsers, setSelectedChannelUsers] = useState(data.general_data.users);
   const [selectedChannelMessages, setSelectedChannelMessages] = useState(data.general_data.messages);
   const [selectedFriend, setSelectedFriend] = useState("");
   const [selectedFriendMessages, setSelectedFriendMessages] = useState<MessageBase[]>([]);
-  const [userType, setUserType] = useState(data.user_type);
   const [blockedUsers, setBlockedUsers] = useState(data.blocked_users);
   const [friends, setFriends] = useState(data.friends);
   const [friendRequests, setFriendRequests] = useState(data.friend_requests);
@@ -30,6 +30,7 @@ const Main = () => {
   const isChannelData = (event: MainSocketEvents): event is ChannelDataResponse => event[0] === "channel_data_res";
   const isChannelMessage = (event: MainSocketEvents): event is ChannelMessageRequest => event[0] === "channel_message_req";
   const isUserUpdate = (event: MainSocketEvents): event is UserUpdate => event[0] === "user_update";
+  const isDMData = (event: MainSocketEvents): event is DirectMessageDataResponse => event[0] === "dm_data_res";
 
   const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
     share: true,
@@ -77,6 +78,9 @@ const Main = () => {
           );
         }
       }
+      else if (isDMData(event)) {
+        setSelectedFriendMessages(event[1].data);
+      }
     },
     filter: m => {
       const event = JSON.parse(m.data);
@@ -84,7 +88,8 @@ const Main = () => {
       return (
         req_type === "channel_data_res" ||
         req_type === "channel_message_req" ||
-        req_type === "user_update"
+        req_type === "user_update" ||
+        req_type === "dm_data_res"
       );
     }
   });
@@ -104,6 +109,14 @@ const Main = () => {
   const onSelectFriend = (friend: string) => {
     setSelectedFriend(friend);
     setSelectedChannel("");
+    const dmDataReq: DirectMessageDataRequest = [
+      "dm_data_req",
+      {
+        from: username,
+        friend: friend
+      }
+    ];
+    sendJsonMessage(dmDataReq);
   }
 
   const onSendMessage = (message: string) => {
@@ -119,7 +132,7 @@ const Main = () => {
       sendJsonMessage(channelMessageReq);
     }
     else {
-
+      console.log(message);
     }
   }
 

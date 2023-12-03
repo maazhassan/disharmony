@@ -49,6 +49,21 @@ export type ChannelDataResponse = [
   }
 ];
 
+export type DirectMessageDataRequest = [
+  "dm_data_req",
+  {
+    from: string,
+    friend: string
+  }
+];
+
+export type DirectMessageDataResponse = [
+  "dm_data_res",
+  {
+    data: MessageBase[]
+  }
+]
+
 export type LoginError = [
   "login_err",
   {
@@ -164,4 +179,5 @@ export type UnblockRequest = [
 export type MainSocketEvents = 
   ChannelDataResponse | 
   ChannelMessageRequest |
-  UserUpdate;
+  UserUpdate |
+  DirectMessageDataResponse;

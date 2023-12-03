@@ -81,18 +81,16 @@ db.channels.insertMany([
 
 db.channels.createIndex({name: 1}, {unique: true});
 
-db.dm_convos.insertOne([
-  {
-    convo: 'John;Carol',
-    messages: [
-      {
-        from: 'John',
-        message: "Hi Carol!"
-      },
-      {
-        from: 'Carol',
-        message: "Hi John!"
-      }
-    ]
-  }
-]);
+db.dm_convos.insertOne({
+  convo: 'Carol;John',
+  messages: [
+    {
+      from: 'John',
+      message: "Hi Carol!"
+    },
+    {
+      from: 'Carol',
+      message: "Hi John!"
+    }
+  ]
+});
