@@ -5,7 +5,7 @@ import UserList from "./rightbar/UserList";
 import { useAppData } from "../App";
 import "./main.css";
 import TextChannels from "./leftbar/TextChannels";
-import { BlockRequest, ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DeleteChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, MainSocketEvents, MessageBase, RemoveFriend, UnblockRequest, UserUpdate } from "../../types/websocket.types";
+import { BlockRequest, ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DeleteChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, JoinChannelRequest, LeaveChannelRequest, MainSocketEvents, MessageBase, RemoveFriend, UnblockRequest, UserUpdate } from "../../types/websocket.types";
 import Friends from "./leftbar/Friends";
 import Header from "./topbar/Header";
 
@@ -35,6 +35,8 @@ const Main = () => {
   const isRemoveFriend = (event: MainSocketEvents): event is RemoveFriend => event[0] === "remove_friend";
   const isCreateChannel = (event: MainSocketEvents): event is CreateChannelRequest => event[0] === "create_channel_req";
   const isDeleteChannel = (event: MainSocketEvents): event is DeleteChannelRequest => event[0] === "delete_channel_req";
+  const isJoinChannel = (event: MainSocketEvents): event is JoinChannelRequest => event[0] === "join_channel_req";
+  const isLeaveChannel = (event: MainSocketEvents): event is LeaveChannelRequest => event[0] === "leave_channel_req";
 
   const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
     share: true,
@@ -110,17 +112,40 @@ const Main = () => {
       }
       else if (isRemoveFriend(event)) {
         const friendToRemove = event[1].user1 === username ? event[1].user2 : event[1].user1;
-        setFriends(friends.filter(f => f !== friendToRemove));
         if (selectedFriend === friendToRemove) {
-          setSelectedFriend("");
-          setSelectedChannel("General");
+          onSelectChannel("General");
         }
+        setFriends(friends.filter(f => f !== friendToRemove));
       }
       else if (isCreateChannel(event)) {
         setChannels([...channels, event[1].name]);
       }
       else if (isDeleteChannel(event)) {
+        if (selectedChannel === event[1].name) {
+          onSelectChannel("General");
+        }
         setChannels(channels.filter(c => c !== event[1].name));
+      }
+      else if (isJoinChannel(event)) {
+        if (event[1].from === username) {
+          setChannels([...channels, event[1].channel]);
+        }
+        if (selectedChannel === event[1].channel) {
+          setSelectedChannelUsers([...selectedChannelUsers, event[1].from]);
+        }
+      }
+      else if (isLeaveChannel(event)) {
+        if (selectedChannel === event[1].channel) {
+          if (event[1].from === username) {
+            onSelectChannel("General");
+          }
+          else {
+            setSelectedChannelUsers(selectedChannelUsers.filter(u => u !== event[1].from));
+          }
+        }
+        if (event[1].from === username) {
+          setChannels(channels.filter(c => c !== event[1].channel));
+        }
       }
     },
     filter: m => {
@@ -135,7 +160,9 @@ const Main = () => {
         req_type === "friend_request_req" ||
         req_type === "friend_request_res" ||
         req_type === "remove_friend" ||
-        req_type === "create_channel_req"
+        req_type === "create_channel_req" ||
+        req_type === "delete_channel_req" ||
+        req_type === "join_channel_req"
       );
     }
   });
@@ -281,11 +308,25 @@ const Main = () => {
   }
 
   const onJoinChannel = (name: string) => {
-    console.log("join channel " + name)
+    const joinChannelRequest: JoinChannelRequest = [
+      "join_channel_req",
+      {
+        from: username,
+        channel: name
+      }
+    ];
+    sendJsonMessage(joinChannelRequest);
   }
 
   const onLeaveChannel = (name: string) => {
-    console.log("leave channel " + name)
+    const leaveChannelRequest: LeaveChannelRequest = [
+      "leave_channel_req",
+      {
+        from: username,
+        channel: name
+      }
+    ];
+    sendJsonMessage(leaveChannelRequest);
   }
 
   return (

@@ -60,6 +60,7 @@ onDeleteChannel
       onJoinChannel(inputText);
       setInputText("");
     }
+    setModalIsOpen(false);
   }
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -124,6 +125,7 @@ onDeleteChannel
             onKeyDown={e => onKeyDown(e)}
             onChange={e => onChange(e)}
             value={inputText}
+            autoFocus={true}
           />
           <button
             className="py-1 px-2 bg-[#77E688] text-white border-none rounded font-semibold hover:cursor-pointer"

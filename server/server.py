@@ -199,6 +199,11 @@ async def messages(websocket):
 
         if req_type == "channel_data_req":
             channel_name = req_body["channel"]
+            
+            # Validate that the user is actually in the channel
+            if not db.channels.find_one({"name": req_body["channel"], "users": username}, ["users"]):
+                continue
+
             channel_data = get_channel_data(channel_name)
             await websocket.send(channel_data_response_event(channel_data))
             continue
@@ -368,26 +373,90 @@ async def messages(websocket):
             continue
 
         if req_type == "delete_channel_req":
+            # Only for admins
+            if websocket not in ADMIN_SET:
+                continue
+
             # General channel cannot be deleted
             if req_body["name"] == "General":
                 continue
 
             # Get the list of users in the channel if it exists
-            chan = db.channels.find_one({"name": req_body["name"]}, ["users"])
-            if chan:
-                users = chan["users"]
+            del_chan = db.channels.find_one({"name": req_body["name"]}, ["users"])
+            if not del_chan:
+                continue
+            
+            del_chan_users = del_chan["users"]
 
             # Remove the channel from the channels list for all users
-            db.users.update_many({
-                "type": {"$ne": "ADMIN"}},
-                {"$pull": {"channels": req_body["name"]}
-            })
+            db.users.update_many(
+                {"type": {"$ne": "ADMIN"}},
+                {"$pull": {"channels": req_body["name"]}}
+            )
 
             # Remove the channel from the DB
             db.channels.delete_one({"name": req_body["name"]})
 
             # Broadcast the deletion to everyone who was in the channel
-            out = [CLIENTS.get(u) for u in users if CLIENTS.get(u)]
+            out = [CLIENTS.get(u) for u in del_chan_users if CLIENTS.get(u)]
+            websockets.broadcast(out, message)
+            continue
+
+        if req_type == "join_channel_req":
+            # Check if channel exists
+            join_chan = db.channels.find_one({"name": req_body["channel"]})
+            if not join_chan:
+                continue
+
+            # Make sure user isn't already in the channel
+            if username in join_chan["users"]:
+                continue
+
+            # Add user to channel in DB
+            db.channels.update_one(
+                {"name": req_body["channel"]},
+                {"$push": {"users": username}}
+            )
+            db.users.update_one(
+                {"username": username},
+                {"$push": {"channels": req_body["channel"]}}
+            )
+
+            # Broadcast the deletion to everyone who is in the channel
+            out = [CLIENTS.get(u) for u in join_chan["users"] if CLIENTS.get(u)]
+            out.append(websocket)
+            websockets.broadcast(out, message)
+            continue
+
+        if req_type == "leave_channel_req":
+            # Admins cannot leave channels
+            if websocket in ADMIN_SET:
+                continue
+
+            # General channel cannot be left
+            if req_body["channel"] == "General":
+                continue
+
+            # Get the list of users in the channel if it exists
+            leave_chan = db.channels.find_one({"name": req_body["channel"]}, ["users"])
+            if not leave_chan:
+                continue
+            
+            leave_chan_users = leave_chan["users"]
+
+            # Remove the channel from the channels list
+            db.users.update_one(
+                {"username": username},
+                {"$pull": {"channels": req_body["channel"]}}
+            )
+
+            # Remove the user from the channel's user list
+            db.channels.update_one(
+                {"name": req_body["channel"]},
+                {"$pull": {"users": username}}
+            )
+
+            out = [CLIENTS.get(u) for u in leave_chan_users if CLIENTS.get(u)]
             websockets.broadcast(out, message)
             continue
     

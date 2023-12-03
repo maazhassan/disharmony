@@ -124,7 +124,7 @@ export type DeleteChannelRequest = [
 export type JoinChannelRequest = [
   "join_channel_req",
   {
-    user: string,
+    from: string,
     channel: string
   }
 ]
@@ -132,7 +132,7 @@ export type JoinChannelRequest = [
 export type LeaveChannelRequest = [
   "leave_channel_req",
   {
-    user: string,
+    from: string,
     channel: string
   }
 ];
@@ -204,4 +204,6 @@ export type MainSocketEvents =
   FriendRequestResponse |
   RemoveFriend |
   CreateChannelRequest |
-  DeleteChannelRequest;
+  DeleteChannelRequest |
+  JoinChannelRequest |
+  LeaveChannelRequest;
