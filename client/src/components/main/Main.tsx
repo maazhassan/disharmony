@@ -74,6 +74,9 @@ const Main = () => {
               eventUser
             ]
           );
+          if (selectedChannel === "General") {
+            setSelectedChannelUsers([...selectedChannelUsers, eventUser.username]);
+          }
         }
         else {
           setUsers(

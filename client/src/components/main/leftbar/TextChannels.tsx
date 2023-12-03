@@ -45,6 +45,7 @@ onDeleteChannel
 
   const closeModal = () => {
     setModalIsOpen(false);
+    setInputText("");
   }
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {

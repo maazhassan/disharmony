@@ -31,6 +31,7 @@ onBlock
   const MENU_ID = "user-card-menu";
 
   const [contextUser, setContextUser] = useState("");
+  const [contextUserType, setContextUserType] = useState<string | undefined>("");
 
   const { show } = useContextMenu({
     id: MENU_ID
@@ -38,6 +39,7 @@ onBlock
 
   const displayMenu = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, name: string) => {
     setContextUser(name);
+    setContextUserType(users.find(u => u.username === name)?.user_type)
     show({event: e});
   }
 
@@ -63,14 +65,18 @@ onBlock
       )}
       </ul>
       <Menu id={MENU_ID}>
-        <Item onClick={() => onKick(contextUser)} hidden={userType !== "ADMIN"}>
+        <Item onClick={() => onKick(contextUser)} hidden={
+          userType !== "ADMIN" || contextUserType === "ADMIN"
+        }>
           Kick User
         </Item>
-        <Item onClick={() => onBan(contextUser)} hidden={userType !== "ADMIN"}>
+        <Item onClick={() => onBan(contextUser)} hidden={
+          userType !== "ADMIN" || contextUserType === "ADMIN"
+        }>
           Ban User
         </Item>        
         <Item onClick={() => onBlock(contextUser)} hidden={
-          userType !== "USER" || friends.includes(contextUser) || blocked.includes(contextUser)
+          friends.includes(contextUser) || blocked.includes(contextUser)
         }>
           Block User
         </Item>

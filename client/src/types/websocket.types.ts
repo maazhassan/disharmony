@@ -8,7 +8,8 @@ export type LoginRequest = [
 
 export type User = {
   username: string,
-  online: boolean
+  online: boolean,
+  user_type: string
 }
 
 export type ChannelData = {

@@ -8,6 +8,12 @@ db.users.insertMany([
     online: false
   },
   {
+    username: 'OtherAdmin',
+    password: 'admin2pass',
+    type: 'ADMIN',
+    online: false
+  },
+  {
     username: 'John',
     password: 'johnpass',
     type: 'USER',
@@ -61,7 +67,7 @@ db.channels.insertMany([
         message: "Rolling in the deeeeeeeeeeep"
       }
     ],
-    users: ['Admin', 'John', 'Carol', 'Santa', 'Adele']
+    users: ['Admin', 'OtherAdmin', 'John', 'Carol', 'Santa', 'Adele']
   },
   {
     name: 'Another One',
@@ -71,11 +77,11 @@ db.channels.insertMany([
         message: "It's pretty empty here..."
       }
     ],
-    users: ['Admin', 'John', 'Carol']
+    users: ['Admin', 'OtherAdmin', 'John', 'Carol']
   },
   {
     name: 'Another One Part 2',
-    users: ['Admin']
+    users: ['Admin', 'OtherAdmin']
   }
 ]);
 

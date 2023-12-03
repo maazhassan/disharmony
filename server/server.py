@@ -12,8 +12,15 @@ db = MongoClient().disharmony
 def error_event(type, message):
     return json.dumps([type, {"message": message}])
 
-def user_update_event(username, online):
-    return json.dumps(["user_update", {"username": username, "online": online}])
+def user_update_event(username, online, user_type):
+    return json.dumps([
+        "user_update",
+        {
+            "username": username,
+            "online": online,
+            "user_type": user_type
+        }
+    ])
 
 def register_response_event(success):
     return json.dumps(["register_res", {"success": success}])
@@ -44,18 +51,8 @@ def get_dm_convo_name(name1, name2):
 
 # Generates the data object that a user gets upon login
 def login_data_event(user: dict):
-    # Get direct messages
+    # Friends
     friends = user.get("friends")
-    # direct_messages = []
-    # if friends:
-    #     for friend in friends:
-    #         convo_string = user["username"] + ";" + friend
-    #         convo = db.dm_convos.find_one({"convo": convo_string})
-    #         if convo:
-    #             direct_messages.append({
-    #                 "friend": friend,
-    #                 "messages": convo["messages"]
-    #             })
     
     # Blocked users
     blocked_users = user.get("blocked")
@@ -66,25 +63,15 @@ def login_data_event(user: dict):
     # Users and their online status
     users_info = [{
         "username": _user["username"],
-        "online": _user["online"]
-    } for _user in db.users.find(projection=['username', 'online'])]
+        "online": _user["online"],
+        "user_type": _user["type"]
+    } for _user in db.users.find(projection=['username', 'online', 'type'])]
 
     # Channels the user is in
     if user["type"] == "ADMIN":
         channel_names = [c["name"] for c in db.channels.find(projection=['name'])]
     else:
         channel_names = user["channels"]
-
-    # Channels and their messages
-    # channels_cursor = (db.channels.find()
-    #                    if user["type"] == "ADMIN"
-    #                    else db.channels.find({"name": {"$in": user["channels"]}})
-    #                    )
-    # channels_info = [{
-    #     "name": channel["name"],
-    #     "users": channel["users"],
-    #     "messages": channel.get("messages") if channel.get("messages") else []
-    # } for channel in channels_cursor]
 
     # Serialize
     return json.dumps([
@@ -119,7 +106,7 @@ async def login_res(username, password, websocket):
     db.users.update_one({"username": username}, {"$set": {"online": True}})
 
     # Broadcast to the other clients that this client is online
-    websockets.broadcast(CLIENTS.values(), user_update_event(username, True))
+    websockets.broadcast(CLIENTS.values(), user_update_event(username, True, user["type"]))
 
     # Store info about this connection
     CLIENTS[username] = websocket
@@ -134,6 +121,9 @@ async def login_res(username, password, websocket):
     return True
 
 async def logout(username, websocket):
+    # Get the user_type from the DB
+    logout_user_type = db.users.find_one({"username": username}, ["type"])["type"]
+
     # Update online status in DB
     db.users.update_one({"username": username}, {"$set": {"online": False}})
 
@@ -144,7 +134,7 @@ async def logout(username, websocket):
     print(f"{username} has logged out.")
 
     # Broadcast that this client is offline
-    websockets.broadcast(CLIENTS.values(), user_update_event(username, False))
+    websockets.broadcast(CLIENTS.values(), user_update_event(username, False, logout_user_type))
 
 async def register(username, password, websocket):
     # Validate username
@@ -166,11 +156,17 @@ async def register(username, password, websocket):
             "channels": ["General"]
         })
 
+        # Add to general channel users
+        db.channels.update_one(
+            {"name": "General"},
+            {"$push": {"users": username}}
+        )
+
         print(f"User {username} created.")
         await websocket.send(register_response_event(True))
 
         # Tell all the clients a new user has registered
-        websockets.broadcast(CLIENTS.values(), user_update_event(username, False))
+        websockets.broadcast(CLIENTS.values(), user_update_event(username, False, "USER"))
     else:
         await websocket.send(register_response_event(False))
         
@@ -359,11 +355,13 @@ async def messages(websocket):
             if websocket not in ADMIN_SET:
                 continue
 
+            admins_list = [user["username"] for user in db.users.find({"type": "ADMIN"}, ["username"])]
+
             # Try adding the channel to the DB
             try:
                 db.channels.insert_one({
                     "name": req_body["name"],
-                    "users": [k for k in CLIENTS.keys() if CLIENTS[k] in ADMIN_SET]
+                    "users": admins_list
                 })
             except DuplicateKeyError:
                 continue
