@@ -72,21 +72,3 @@ body, html {
   height: 100%;
   /* overflow: hidden; */
 }
-
-.user-window {
-  width: 15%;
-  background-color: #635870;
-}
-
-.chat-input {
-  padding: 0.5rem 0.5rem;
-  border-radius: 5px;
-  margin-left: 1rem;
-  margin-bottom: 1rem;
-  text-indent: 0.5rem;
-  position: absolute;
-  bottom: 0;
-  box-sizing: border-box;
-  width: 55%;
-
-}

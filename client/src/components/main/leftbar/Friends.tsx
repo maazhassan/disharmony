@@ -1,5 +1,5 @@
 import { User } from "../../../types/websocket.types";
-import UserCard from "../../common/UserCard";
+import UserCard from "../common/UserCard";
 
 type FriendsProps = {
   friends: Set<string>,
