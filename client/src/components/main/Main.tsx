@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserGroup } from "@fortawesome/free-solid-svg-icons/faUserGroup";
 import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
 import TextChannels from "./leftbar/TextChannels";
-import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, DirectMessageDataRequest, DirectMessageDataResponse, MainSocketEvents, MessageBase, User, UserUpdate } from "../../types/websocket.types";
+import { ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, MainSocketEvents, MessageBase, User, UserUpdate } from "../../types/websocket.types";
 import Friends from "./leftbar/Friends";
 
 const Main = () => {
@@ -31,6 +31,7 @@ const Main = () => {
   const isChannelMessage = (event: MainSocketEvents): event is ChannelMessageRequest => event[0] === "channel_message_req";
   const isUserUpdate = (event: MainSocketEvents): event is UserUpdate => event[0] === "user_update";
   const isDMData = (event: MainSocketEvents): event is DirectMessageDataResponse => event[0] === "dm_data_res";
+  const isDMMessage = (event: MainSocketEvents): event is DirectMessageRequest => event[0] === "direct_message_req";
 
   const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
     share: true,
@@ -80,6 +81,17 @@ const Main = () => {
       }
       else if (isDMData(event)) {
         setSelectedFriendMessages(event[1].data);
+      }
+      else if (isDMMessage(event)) {
+        const directMessage = event[1];
+        if (selectedFriend === directMessage.from || selectedFriend === directMessage.to) {
+          setSelectedFriendMessages(
+            [
+              ...selectedFriendMessages,
+              { from: directMessage.from, message: directMessage.message }
+            ]
+          );
+        }
       }
     },
     filter: m => {
@@ -132,7 +144,15 @@ const Main = () => {
       sendJsonMessage(channelMessageReq);
     }
     else {
-      console.log(message);
+      const directMessageRequest: DirectMessageRequest = [
+        "direct_message_req",
+        {
+          from: username,
+          to: selectedFriend,
+          message: message
+        }
+      ];
+      sendJsonMessage(directMessageRequest);
     }
   }
 

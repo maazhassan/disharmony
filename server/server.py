@@ -221,6 +221,23 @@ async def messages(websocket):
             await websocket.send(dm_data_response_event(convo_messages))
             continue
 
+        if req_type == "direct_message_req":
+            convo_name = get_dm_convo_name(req_body["from"], req_body["to"])
+
+            # Add message to DB
+            db.dm_convos.update_one(
+                {"convo": convo_name}, 
+                {"$push": {"messages": {
+                    "from": req_body["from"],
+                    "message": req_body["message"]
+                }}}
+            )
+
+            # Broadcast the message to the two people involved
+            out = [CLIENTS.get(name) for name in [req_body["from"], req_body["to"]] if CLIENTS.get(name)]
+            websockets.broadcast(out, message)
+            continue
+
     
     print("Connection closed.")
     # Logout if logged in

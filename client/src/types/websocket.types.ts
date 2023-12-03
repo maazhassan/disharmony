@@ -11,11 +11,6 @@ export type User = {
   online: boolean
 }
 
-// export type DirectMessageData = {
-//   friend: string,
-//   messages: MessageBase[]
-// }
-
 export type ChannelData = {
   name: string,
   users: string[],
@@ -180,4 +175,5 @@ export type MainSocketEvents =
   ChannelDataResponse | 
   ChannelMessageRequest |
   UserUpdate |
-  DirectMessageDataResponse;
+  DirectMessageDataResponse |
+  DirectMessageRequest;
