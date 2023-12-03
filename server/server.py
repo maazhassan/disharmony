@@ -334,6 +334,14 @@ async def messages(websocket):
                 {"username": req_body["from"]},
                 {"$push": {"blocked": req_body["to"]}}
             )
+            continue
+        
+        if req_type == "unblock_req":
+            # Remove user from blocked list
+            db.users.update_one(
+                {"username": req_body["from"]},
+                {"$pull": {"blocked": req_body["to"]}}
+            )
     
     print("Connection closed.")
     # Logout if logged in

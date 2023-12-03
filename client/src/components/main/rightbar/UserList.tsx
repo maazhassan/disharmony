@@ -63,32 +63,22 @@ onBlock
       )}
       </ul>
       <Menu id={MENU_ID}>
-        {
-          userType === "ADMIN" &&
-          <>
-            <Item onClick={() => onKick(contextUser)}>
-              Kick User
-            </Item>
-            <Item onClick={() => onBan(contextUser)}>
-              Ban User
-            </Item>
-          </>
-        }
-        {
-          userType === "USER" &&
-          !friends.includes(contextUser) &&
-          !blocked.includes(contextUser) &&
-          <Item onClick={() => onBlock(contextUser)}>
-            Block User
-          </Item>
-        }
-        {
-          !friends.includes(contextUser) &&
-          !blocked.includes(contextUser) &&
-          <Item onClick={() => onFriendReq(contextUser)}>
-            Friend Request
-          </Item>
-        }
+        <Item onClick={() => onKick(contextUser)} hidden={userType !== "ADMIN"}>
+          Kick User
+        </Item>
+        <Item onClick={() => onBan(contextUser)} hidden={userType !== "ADMIN"}>
+          Ban User
+        </Item>        
+        <Item onClick={() => onBlock(contextUser)} hidden={
+          userType !== "USER" || friends.includes(contextUser) || blocked.includes(contextUser)
+        }>
+          Block User
+        </Item>
+        <Item onClick={() => onFriendReq(contextUser)} hidden={
+          friends.includes(contextUser) || blocked.includes(contextUser)
+        }>
+          Friend Request
+        </Item>
       </Menu>
     </div>
   )

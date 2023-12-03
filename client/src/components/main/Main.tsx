@@ -6,7 +6,7 @@ import { useAppData } from "../App";
 import "./main.css";
 import { faArrowUpFromBracket } from "@fortawesome/free-solid-svg-icons";
 import TextChannels from "./leftbar/TextChannels";
-import { BlockRequest, ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, MainSocketEvents, MessageBase, RemoveFriend, User, UserUpdate } from "../../types/websocket.types";
+import { BlockRequest, ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, MainSocketEvents, MessageBase, RemoveFriend, UnblockRequest, User, UserUpdate } from "../../types/websocket.types";
 import Friends from "./leftbar/Friends";
 import Header from "./topbar/Header";
 
@@ -240,12 +240,25 @@ const Main = () => {
     sendJsonMessage(blockRequest);
   }
 
+  const onUnblock = (to: string) => {
+    setBlockedUsers(blockedUsers.filter(u => u !== to));
+    const unblockRequest: UnblockRequest = [
+      "unblock_req",
+      {
+        from: username,
+        to: to
+      }
+    ];
+    sendJsonMessage(unblockRequest);
+  }
+
   return (
     <div className="flex flex-col h-screen">
       <Header 
         friendRequests={friendRequests}
         blocked={blockedUsers}
         onRespond={onRespondFriendReq}
+        onUnblock={onUnblock}
       />
 
       <div className="cols-box">

@@ -7,12 +7,13 @@ import { faBan, faSquareCheck, faSquareXmark } from "@fortawesome/free-solid-svg
 type HeaderProps = {
   friendRequests: string[],
   blocked: string[],
-  onRespond: (to: string, accepted: boolean) => void
+  onRespond: (to: string, accepted: boolean) => void,
+  onUnblock: (to: string) => void
 }
 
 ReactModal.setAppElement("#root");
 
-const Header = ({ friendRequests, blocked, onRespond }: HeaderProps) => {
+const Header = ({ friendRequests, blocked, onRespond, onUnblock }: HeaderProps) => {
   const [fmodalIsOpen, setFModalIsOpen] = useState(false);
   const [bmodalIsOpen, setBModalIsOpen] = useState(false);
 
@@ -97,7 +98,7 @@ const Header = ({ friendRequests, blocked, onRespond }: HeaderProps) => {
                 <FontAwesomeIcon
                   icon={faSquareXmark}
                   className="h-8 w-8 absolute right-4 text-app-pink hover:cursor-pointer" 
-                  onClick={() => onRespond(user, false)}
+                  onClick={() => onUnblock(user)}
                 />
               </div>
             </li>
