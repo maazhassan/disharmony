@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { User } from "../../../types/websocket.types";
 import UserCard from "../common/UserCard";
 import { Menu, Item, useContextMenu } from "react-contexify";
@@ -6,30 +7,34 @@ type UserListProps = {
   selectedUsers: Set<string>,
   users: User[],
   userType: string,
-  username: string
+  username: string,
+  onKick: (user: string) => void,
+  onBan: (user: string) => void,
+  onFriendReq: (to: string) => void,
+  onBlock: (to: string) => void
 }
 
-const UserList = ({ selectedUsers, users, userType, username }: UserListProps) => {
+const UserList = ({ 
+selectedUsers,
+users,
+userType,
+username ,
+onKick,
+onBan,
+onFriendReq,
+onBlock
+}: UserListProps) => {
   const MENU_ID = "user-card-menu";
+
+  const [selectedUser, setSelectedUser] = useState("");
 
   const { show } = useContextMenu({
     id: MENU_ID
   });
 
-  const onKick = () => {
-    console.log('kick')
-  }
-
-  const onBan = () => {
-    console.log('ban')
-  }
-
-  const onFriendReq = () => {
-    console.log('friend req')
-  }
-
-  const onBlock = () => {
-    console.log('block')
+  const displayMenu = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, name: string) => {
+    setSelectedUser(name);
+    show({event: e});
   }
 
   return (
@@ -40,7 +45,9 @@ const UserList = ({ selectedUsers, users, userType, username }: UserListProps) =
         <li 
           key={idx}
           onContextMenu={
-            user.username === username ? e => e.preventDefault() : e => show({event: e})
+            user.username === username ? 
+            e => e.preventDefault() : 
+            e => displayMenu(e, user.username)
           }
         >
           <UserCard 
@@ -48,31 +55,31 @@ const UserList = ({ selectedUsers, users, userType, username }: UserListProps) =
             online={user.online}
             className="ml-6 mt-2 text-white"
           />
-          <Menu id={MENU_ID}>
-            {
-              userType === "ADMIN" &&
-              <>
-                <Item onClick={onKick}>
-                  Kick User
-                </Item>
-                <Item onClick={onBan}>
-                  Ban User
-                </Item>
-              </>
-            }
-            {
-              userType === "USER" &&
-              <Item onClick={onBlock}>
-                Block User
-              </Item>
-            }
-            <Item onClick={onFriendReq}>
-              Friend Request
-            </Item>
-          </Menu>
         </li>
       )}
       </ul>
+      <Menu id={MENU_ID}>
+        {
+          userType === "ADMIN" &&
+          <>
+            <Item onClick={() => onKick(selectedUser)}>
+              Kick User
+            </Item>
+            <Item onClick={() => onBan(selectedUser)}>
+              Ban User
+            </Item>
+          </>
+        }
+        {
+          userType === "USER" &&
+          <Item onClick={() => onBlock(selectedUser)}>
+            Block User
+          </Item>
+        }
+        <Item onClick={() => onFriendReq(selectedUser)}>
+          Friend Request
+        </Item>
+      </Menu>
     </div>
   )
 }

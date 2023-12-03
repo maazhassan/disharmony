@@ -156,6 +156,22 @@ const Main = () => {
     }
   }
 
+  const onKick = (user: string) => {
+    console.log('kick ' + user)
+  }
+
+  const onBan = (user: string) => {
+    console.log('ban ' + user)
+  }
+
+  const onFriendReq = (to: string) => {
+    console.log('friend req ' + to)
+  }
+
+  const onBlock = (to: string) => {
+    console.log('block ' + to)
+  }
+
   return (
     <div className="flex flex-col h-screen">
       <div className="title-box">
@@ -193,6 +209,10 @@ const Main = () => {
           users={users}
           userType={USER_TYPE}
           username={username}
+          onKick={onKick}
+          onBan={onBan}
+          onBlock={onBlock}
+          onFriendReq={onFriendReq}
         />
       </div>
     </div>
