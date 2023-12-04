@@ -124,7 +124,7 @@ const Header = ({ friendRequests, blocked, onRespond, onUnblock, onFriendReq, on
             <li className="flex flex-row justify-center text-white text-xl font-medium mt-2">Blocked Users</li>
             <FontAwesomeIcon 
               icon={faSquareXmark}
-              className="h-8 w-8 pt-2 absolute right-2.5 hover:cursor-pointer"
+              className="h-8 w-8 pt-2 absolute right-2.5 hover:cursor-pointer text-app-pink"
               onClick={closeBModal}
             />
           </span>
