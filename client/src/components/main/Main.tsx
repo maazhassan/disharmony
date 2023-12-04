@@ -25,8 +25,6 @@ const Main = () => {
   const [users, setUsers] = useState(data.users);
   const [channels, setChannels] = useState(data.channels);
   const [bannedUsers, setBannedUsers] = useState([""]);
-
-  //DELETE LATER ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   const [isOpen, setIsOpen] = useState(false);
   const [isChannelsOpen, setIsChannelsOpen] = useState(false);
   const [isFriendsOpen, setIsFriendsOpen] = useState(false);
@@ -52,8 +50,7 @@ const Main = () => {
   const toggleUsers = () => {
     setIsUsersOpen(!isUsersOpen);
   };
-  //DELETE LATER ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
+  
   const isChannelData = (event: MainSocketEvents): event is ChannelDataResponse => event[0] === "channel_data_res";
   const isChannelMessage = (event: MainSocketEvents): event is ChannelMessageRequest => event[0] === "channel_message_req";
   const isUserUpdate = (event: MainSocketEvents): event is UserUpdate => event[0] === "user_update";
@@ -470,8 +467,7 @@ const Main = () => {
         />
       </div>
 
-{/* Mobile version content MOVE LATER----------------------------------------------------------------------------------------------------------------------------------------------*/}
-
+{/* Mobile version content */}
       <div className="flex flex-col h-screen unique-class">
     <div className="mobile-header">
     <span className="triple-bar-icon" onClick={handleClick}>&#9776;</span>
