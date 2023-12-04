@@ -13,7 +13,7 @@ const UserCard = ({ name, online, className }: UserProps) => {
       <svg height="10" width="10" className="absolute my-auto top-0 bottom-0">
         <circle cx="5" cy="5" r="5" fill={`${online ? "#34eb43" : "red"}`} />
       </svg>
-      <span className="text-xl font-medium ml-6">
+      <span className="text-xl font-medium ml-6 select-none">
         {name}
       </span>
     </div>

@@ -8,6 +8,9 @@ type UserListProps = {
   users: User[],
   userType: string,
   username: string,
+  friends: string[],
+  blocked: string[],
+  selectedFriend: string,
   onKick: (user: string) => void,
   onBan: (user: string) => void,
   onFriendReq: (to: string) => void,
@@ -18,7 +21,10 @@ const UserList = ({
 selectedUsers,
 users,
 userType,
-username ,
+username,
+friends,
+blocked,
+selectedFriend,
 onKick,
 onBan,
 onFriendReq,
@@ -26,14 +32,16 @@ onBlock
 }: UserListProps) => {
   const MENU_ID = "user-card-menu";
 
-  const [selectedUser, setSelectedUser] = useState("");
+  const [contextUser, setContextUser] = useState("");
+  const [contextUserType, setContextUserType] = useState<string | undefined>("");
 
   const { show } = useContextMenu({
     id: MENU_ID
   });
 
   const displayMenu = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, name: string) => {
-    setSelectedUser(name);
+    setContextUser(name);
+    setContextUserType(users.find(u => u.username === name)?.user_type)
     show({event: e});
   }
 
@@ -45,7 +53,7 @@ onBlock
         <li 
           key={idx}
           onContextMenu={
-            user.username === username ? 
+            (user.username === username || user.username === selectedFriend) ? 
             e => e.preventDefault() : 
             e => displayMenu(e, user.username)
           }
@@ -59,24 +67,24 @@ onBlock
       )}
       </ul>
       <Menu id={MENU_ID}>
-        {
-          userType === "ADMIN" &&
-          <>
-            <Item onClick={() => onKick(selectedUser)}>
-              Kick User
-            </Item>
-            <Item onClick={() => onBan(selectedUser)}>
-              Ban User
-            </Item>
-          </>
-        }
-        {
-          userType === "USER" &&
-          <Item onClick={() => onBlock(selectedUser)}>
-            Block User
-          </Item>
-        }
-        <Item onClick={() => onFriendReq(selectedUser)}>
+        <Item onClick={() => onKick(contextUser)} hidden={
+          userType !== "ADMIN" || contextUserType === "ADMIN"
+        }>
+          Kick User
+        </Item>
+        <Item onClick={() => onBan(contextUser)} hidden={
+          userType !== "ADMIN" || contextUserType === "ADMIN"
+        }>
+          Ban User
+        </Item>        
+        <Item onClick={() => onBlock(contextUser)} hidden={
+          friends.includes(contextUser) || blocked.includes(contextUser)
+        }>
+          Block User
+        </Item>
+        <Item onClick={() => onFriendReq(contextUser)} hidden={
+          friends.includes(contextUser) || blocked.includes(contextUser)
+        }>
           Friend Request
         </Item>
       </Menu>

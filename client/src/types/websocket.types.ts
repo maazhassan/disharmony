@@ -8,7 +8,8 @@ export type LoginRequest = [
 
 export type User = {
   username: string,
-  online: boolean
+  online: boolean,
+  user_type: string
 }
 
 export type ChannelData = {
@@ -26,7 +27,7 @@ export type LoginData = [
     friend_requests: string[],
     users: User[],
     channels: string[],
-    general_data: ChannelData
+    initial_data: ChannelData
   }
 ];
 
@@ -114,13 +115,28 @@ export type CreateChannelRequest = [
   }
 ];
 
+export type DeleteChannelRequest = [
+  "delete_channel_req",
+  {
+    name: string
+  }
+];
+
 export type JoinChannelRequest = [
   "join_channel_req",
   {
-    user: string,
+    from: string,
     channel: string
   }
 ]
+
+export type LeaveChannelRequest = [
+  "leave_channel_req",
+  {
+    from: string,
+    channel: string
+  }
+];
 
 export type FriendRequest = [
   "friend_request_req",
@@ -139,6 +155,14 @@ export type FriendRequestResponse = [
   }
 ];
 
+export type RemoveFriend = [
+  "remove_friend",
+  {
+    user1: string,
+    user2: string
+  }
+]
+
 export type KickRequest = [
   "kick_req",
   {
@@ -149,6 +173,14 @@ export type KickRequest = [
 
 export type BanRequest = [
   "ban_req",
+  {
+    user: string,
+    channel: string
+  }
+];
+
+export type UnbanRequest = [
+  "unban_req",
   {
     user: string,
     channel: string
@@ -171,10 +203,31 @@ export type UnblockRequest = [
   }
 ];
 
+export type BannedUsersRequest = [
+  "banned_users_req",
+  {
+    channel: string
+  }
+];
+
+export type BannedUsersResponse = [
+  "banned_users_res",
+  {
+    users: string[]
+  }
+];
+
 export type MainSocketEvents = 
   ChannelDataResponse | 
   ChannelMessageRequest |
   UserUpdate |
   DirectMessageDataResponse |
   DirectMessageRequest |
-  FriendRequest;
+  FriendRequest |
+  FriendRequestResponse |
+  RemoveFriend |
+  CreateChannelRequest |
+  DeleteChannelRequest |
+  JoinChannelRequest |
+  LeaveChannelRequest |
+  BannedUsersResponse;

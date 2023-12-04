@@ -67,7 +67,7 @@ const MessageWindow = ({
         )
       )
     }
-    else {
+    else if (selectedFriend) {
       return (
         selectedFriendMessages.map((message, idx) => 
           <MessageBubble
@@ -78,6 +78,9 @@ const MessageWindow = ({
           />
         )
       )
+    }
+    else {
+      return null;
     }
   }
 
@@ -90,7 +93,7 @@ const MessageWindow = ({
   return (
     <div className="flex flex-col w-[70%] relative">
       <h2 className="general-channel-h2">
-        {selectedChannel ? selectedChannel : selectedFriend}
+        {selectedChannel ? selectedChannel : selectedFriend || <span>&#8203;</span>}
       </h2>
       <div className="w-full overflow-auto" id="lol" ref={displayRef}>
         {filterMessages()}
