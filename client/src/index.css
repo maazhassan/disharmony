@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --contexify-menu-bgColor: #41364f;
+  --contexify-separator-color: #ffffff;
+  --contexify-item-color: #ffffff;
+  --contexify-activeItem-color: #fff;
+  --contexify-activeItem-bgColor: #ed7b82;
+  --contexify-rightSlot-color: #ffffff;
+  --contexify-activeRightSlot-color: #fff;
+  --contexify-arrow-color: #ffffff;
+  --contexify-activeArrow-color: #fff;
+}
+
+/* Scroll bar stylings */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  border-radius: 30px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #4C4254;
+  border-radius: 30px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #2d2535;
+  border-radius: 30px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #362c3f; 
+}

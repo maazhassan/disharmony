@@ -1,25 +1,31 @@
-import React, { useState } from 'react';
-
-type RegisterProps = {
-  handleClickLogin: (u: string, p: string) => void,
-  connectionStatus: string,
-}
+import { useState, KeyboardEvent } from 'react';
+import { useAppData } from './App';
 
 
-const Register = ({ handleClickLogin, connectionStatus }: RegisterProps) => {
+const CreateAccount = () => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
 
+  const { handleClickCreate, connectionStatus, registerMessage } = useAppData();
+
+  const filterSpecialChars = (e: KeyboardEvent<HTMLInputElement>) => {
+    const disallowed = new Set([';', "'"]);
+    if (disallowed.has(e.key)) {
+      e.preventDefault();
+    }
+  }
+
   return (
     <div className="flex justify-center">
-      <div className="flex flex-col mt-32 items-center h-[30rem] w-[25rem] bg-modal-color rounded-lg">
+      <div className="flex flex-col mt-32 items-center h-[25rem] w-[25rem] bg-modal-color rounded-lg">
         <h2 className="text-white text-2xl mt-10">
-          Login
+          Create Account
         </h2>
         <input
             className="mt-10 indent-3 rounded w-72 h-10 border-none focus:outline-none"
             type='text'
             placeholder='Username...'
+            onKeyDown={e => filterSpecialChars(e)}
             onChange={e => setName(e.target.value)}
           />
           <input
@@ -31,20 +37,17 @@ const Register = ({ handleClickLogin, connectionStatus }: RegisterProps) => {
           </input>
         <button 
           className="py-2 px-8 mt-12 bg-app-pink text-white border-none rounded font-semibold hover:cursor-pointer"
-          onClick={() => handleClickLogin(name, password)}
+          onClick={() => handleClickCreate(name, password)}
           disabled={connectionStatus !== "Open" || name.length === 0}
         >
-          Login
+          Create
         </button>
-        <div className="text-white mt-24">
-          Don't have an account?&nbsp;
-          <span className="text-app-pink underline hover:cursor-pointer hover:text-app-pink">
-            Click here!
-          </span>
-        </div>
+        <span className="mt-8 text-red-500">
+          {registerMessage !== "" ? registerMessage : null}
+        </span>
       </div>
     </div>
   );
 }
 
-export default Register;
+export default CreateAccount;
