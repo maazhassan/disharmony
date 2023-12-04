@@ -26,6 +26,34 @@ const Main = () => {
   const [channels, setChannels] = useState(data.channels);
   const [bannedUsers, setBannedUsers] = useState([""]);
 
+  //DELETE LATER ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  const [isOpen, setIsOpen] = useState(false);
+  const [isChannelsOpen, setIsChannelsOpen] = useState(false);
+  const [isFriendsOpen, setIsFriendsOpen] = useState(false);
+  const [isRequestsOpen, setIsRequestsOpen] = useState(false);
+  const [isUsersOpen, setIsUsersOpen] = useState(false);
+
+  const handleClick = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const toggleChannels = () => {
+    setIsChannelsOpen(!isChannelsOpen);
+  };
+  
+  const toggleFriends = () => {
+    setIsFriendsOpen(!isFriendsOpen);
+  };
+  
+  const toggleRequests = () => {
+    setIsRequestsOpen(!isRequestsOpen);
+  };
+  
+  const toggleUsers = () => {
+    setIsUsersOpen(!isUsersOpen);
+  };
+  //DELETE LATER ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
   const isChannelData = (event: MainSocketEvents): event is ChannelDataResponse => event[0] === "channel_data_res";
   const isChannelMessage = (event: MainSocketEvents): event is ChannelMessageRequest => event[0] === "channel_message_req";
   const isUserUpdate = (event: MainSocketEvents): event is UserUpdate => event[0] === "user_update";
@@ -441,6 +469,85 @@ const Main = () => {
           onFriendReq={onSendFriendReq}
         />
       </div>
+
+{/* Mobile version content MOVE LATER----------------------------------------------------------------------------------------------------------------------------------------------*/}
+
+      <div className="flex flex-col h-screen unique-class">
+    <div className="mobile-header">
+    <span className="triple-bar-icon" onClick={handleClick}>&#9776;</span>
+      <div className="channel-name">
+        {selectedChannel}
+      </div>
+    </div>
+
+    {isOpen && (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      right: 0,
+      width: '50%',
+      height: '100%',
+      overflow: 'auto',
+      backgroundColor: '#332B38', 
+      zIndex: 1000, 
+    }}>
+      <div>
+      <span className = "dropdown-title" onClick={toggleChannels}>Text channels &#x25BC;</span>
+        {isChannelsOpen && (
+        <div>
+          {channels.map((channel, index) => (
+          <div className = "channel" key={index}>{channel}</div>
+          ))}
+        </div>
+        )}
+
+        <div>
+        <span className = "dropdown-title" onClick={toggleFriends}>Friends &#x25BC;</span>
+          {isFriendsOpen && (
+        <div>
+          {friends.map((friend, index) => (
+          <div className="friend" key={index}>{friend}</div>
+          ))}
+        </div>
+        )}
+
+        <div>
+        <span className = "dropdown-title" onClick={toggleRequests}>Friend requests &#x25BC;</span>
+        {isRequestsOpen && (
+        <div>
+        {friendRequests.map((request, index) => (
+        <div className="request" key={index}>{request}</div>
+        ))}
+        </div>
+        )}
+
+        <div>
+        <span className = "dropdown-title" onClick={toggleUsers}>Users &#x25BC;</span>
+        {isUsersOpen && (
+        <div>
+        {users.map((user, index) => (
+        <div className="user" key={index}>{user.username}</div>
+      ))}
+        </div>
+      )}
+    </div>
+    </div>     
+    </div>
+    </div>
+    </div>
+  )}
+
+    <div className="mobile-messages">
+      <MessageWindow 
+        selectedChannelMessages={selectedChannelMessages}
+        selectedFriendMessages={selectedFriendMessages}
+        selectedChannel={selectedChannel}
+        selectedFriend={selectedFriend}
+        username={username}
+        onSendMessage={message => onSendMessage(message)}
+      />
+    </div>
+    </div>
     </div>
     // <div className="flex flex-row gap-6">
     //   <UserList
