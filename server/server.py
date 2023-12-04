@@ -37,6 +37,9 @@ def friend_request_event(_from, to):
 def leave_channel_event(_from, channel):
     return json.dumps(["leave_channel_req", {"from": _from, "channel": channel}])
 
+def banned_users_response_event(data):
+    return json.dumps(["banned_users_res", {"users": data}])
+
 def get_channel_data(name):
     channel = db.channels.find_one({"name": name})
     messages = channel.get("messages")
@@ -493,6 +496,24 @@ async def messages(websocket):
                 {"name": req_body["channel"]},
                 {"$push": {"banned": req_body["user"]}}
             )
+            continue
+        
+        if req_type == "unban_req":
+            # Remove user from channel's banned list
+            db.channels.update_one(
+                {"name": req_body["channel"]},
+                {"$pull": {"banned": req_body["user"]}}
+            )
+            continue
+
+        if req_type == "banned_users_req":
+            b_chan = db.channels.find_one({"name": req_body["channel"]}, ["banned"])
+            if b_chan and b_chan.get("banned"):
+                banned_users = b_chan.get("banned")
+            else:
+                banned_users = []
+
+            await websocket.send(banned_users_response_event(banned_users))
             continue
     
     print("Connection closed.")

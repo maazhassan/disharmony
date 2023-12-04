@@ -1,3 +1,5 @@
+import { faSquareXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { Menu, Item, useContextMenu } from "react-contexify";
 import ReactModal from "react-modal";
@@ -6,12 +8,15 @@ type TextChannelsProps = {
   channels: string[],
   selected: string,
   userType: string,
+  bannedUsers: string[],
   onSelect: (channel: string) => void,
   onUnselect: () => void,
   onCreateChannel: (name: string) => void,
   onDeleteChannel: (name: string) => void,
   onJoinChannel: (name: string) => void,
-  onLeaveChannel: (name: string) => void
+  onLeaveChannel: (name: string) => void,
+  onUnban: (user: string, channel: string) => void,
+  getBannedUsers: (channel: string) => void
 }
 
 ReactModal.setAppElement("#root");
@@ -20,17 +25,21 @@ const TextChannels = ({
 channels,
 selected,
 userType,
+bannedUsers,
 onSelect,
 onUnselect,
 onCreateChannel,
 onLeaveChannel,
 onJoinChannel,
-onDeleteChannel
+onDeleteChannel,
+onUnban,
+getBannedUsers
 }: TextChannelsProps) => {
   const HEADER_MENU_ID = "create-channel-menu";
   const CHANNEL_MENU_ID = "join-channel-menu";
 
-  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [hmodalIsOpen, setHModalIsOpen] = useState(false);
+  const [cmodalIsOpen, setCModalIsOpen] = useState(false);
   const [inputText, setInputText] = useState("");
   const [contextChannel, setContextChannel] = useState("");
 
@@ -41,20 +50,29 @@ onDeleteChannel
     show({id: CHANNEL_MENU_ID, event: e});
   }
 
-  const openModal = () => {
-    setModalIsOpen(true);
+  const openHModal = () => {
+    setHModalIsOpen(true);
   }
 
-  const closeModal = () => {
-    setModalIsOpen(false);
+  const closeHModal = () => {
+    setHModalIsOpen(false);
     setInputText("");
+  }
+
+  const openCModal = () => {
+    getBannedUsers(contextChannel);
+    setCModalIsOpen(true);
+  }
+
+  const closeCModal = () => {
+    setCModalIsOpen(false);
   }
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(e.currentTarget.value);
   }
 
-  const onSubmitModal = () => {
+  const onSubmitHModal = () => {
     if (userType === "ADMIN") {
       onCreateChannel(inputText);
       setInputText("");
@@ -63,12 +81,12 @@ onDeleteChannel
       onJoinChannel(inputText);
       setInputText("");
     }
-    setModalIsOpen(false);
+    setHModalIsOpen(false);
   }
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key == "Enter") {
-      onSubmitModal();
+      onSubmitHModal();
     }
   }
 
@@ -90,10 +108,10 @@ onDeleteChannel
         Text Channels
       </h2>
       <Menu id={HEADER_MENU_ID}>
-        <Item onClick={() => openModal()} hidden={userType === "USER"}>
+        <Item onClick={() => openHModal()} hidden={userType === "USER"}>
           Create Channel
         </Item>
-        <Item onClick={() => openModal()} hidden={userType === "ADMIN"}>
+        <Item onClick={() => openHModal()} hidden={userType === "ADMIN"}>
           Join Channel
         </Item>
       </Menu>
@@ -123,13 +141,13 @@ onDeleteChannel
         <Item onClick={() => onLeaveChannel(contextChannel)} hidden={userType === "ADMIN"}>
           Leave Channel
         </Item>
-        {/* <Item onClick={() => onLeaveChannel(contextChannel)} hidden={userType === "ADMIN"}>
+        <Item onClick={() => openCModal()} hidden={userType !== "ADMIN"}>
           Banned Users
-        </Item> */}
+        </Item>
       </Menu>
       <ReactModal
-        isOpen={modalIsOpen}
-        onRequestClose={closeModal}
+        isOpen={hmodalIsOpen}
+        onRequestClose={closeHModal}
         className={"fixed w-72 h-32 bg-bg-color rounded-md outline-none top-20 left-48"}
         overlayClassName={"fixed top-0 left-0 right-0 bottom-0 bg-white/10"}
       >
@@ -144,14 +162,42 @@ onDeleteChannel
           />
           <button
             className="py-1 px-2 bg-[#77E688] text-white border-none rounded font-semibold hover:cursor-pointer"
-            onClick={onSubmitModal}
+            onClick={onSubmitHModal}
           >
             Go
           </button>
         </div>
         <button
           className="absolute bottom-3 right-0 left-0 w-fit mx-auto py-1 px-8 bg-app-pink text-white border-none rounded font-semibold hover:cursor-pointer"
-          onClick={closeModal}
+          onClick={closeHModal}
+        >
+          Close
+        </button>
+      </ReactModal>
+      <ReactModal
+        isOpen={cmodalIsOpen}
+        onRequestClose={closeCModal}
+        className={"fixed w-80 h-[28rem] bg-bg-color rounded-md outline-none top-20 left-52"}
+        overlayClassName={"fixed top-0 left-0 right-0 bottom-0 bg-white/10"}
+      >
+        <ul className="h-[87%] overflow-auto">
+          <li className="flex flex-row justify-center text-white text-lg font-medium mt-2 text-center">Banned Users: {contextChannel}</li>
+          {bannedUsers.map((user, idx) =>
+            <li key={idx} className="flex flex-row justify-center">
+              <div className="relative bg-modal-color w-[90%] mt-2 rounded-md py-2">
+                <span className="text-white text-xl font-medium ml-4">{user}</span>
+                <FontAwesomeIcon
+                  icon={faSquareXmark}
+                  className="h-8 w-8 absolute right-4 text-app-pink hover:cursor-pointer" 
+                  onClick={() => onUnban(user, contextChannel)}
+                />
+              </div>
+            </li>
+          )}
+        </ul>
+        <button
+          onClick={closeCModal}
+          className="absolute bottom-3 right-0 left-0 w-fit mx-auto py-1 px-8 bg-app-pink text-white border-none rounded font-semibold hover:cursor-pointer"
         >
           Close
         </button>

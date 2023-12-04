@@ -5,7 +5,7 @@ import UserList from "./rightbar/UserList";
 import { useAppData } from "../App";
 import "./main.css";
 import TextChannels from "./leftbar/TextChannels";
-import { BanRequest, BlockRequest, ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DeleteChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, JoinChannelRequest, KickRequest, LeaveChannelRequest, MainSocketEvents, MessageBase, RemoveFriend, UnbanRequest, UnblockRequest, UserUpdate } from "../../types/websocket.types";
+import { BanRequest, BannedUsersRequest, BannedUsersResponse, BlockRequest, ChannelDataRequest, ChannelDataResponse, ChannelMessageRequest, CreateChannelRequest, DeleteChannelRequest, DirectMessageDataRequest, DirectMessageDataResponse, DirectMessageRequest, FriendRequest, FriendRequestResponse, JoinChannelRequest, KickRequest, LeaveChannelRequest, MainSocketEvents, MessageBase, RemoveFriend, UnbanRequest, UnblockRequest, UserUpdate } from "../../types/websocket.types";
 import Friends from "./leftbar/Friends";
 import Header from "./topbar/Header";
 
@@ -24,6 +24,7 @@ const Main = () => {
   const [friendRequests, setFriendRequests] = useState(data.friend_requests);
   const [users, setUsers] = useState(data.users);
   const [channels, setChannels] = useState(data.channels);
+  const [bannedUsers, setBannedUsers] = useState([""]);
 
   const isChannelData = (event: MainSocketEvents): event is ChannelDataResponse => event[0] === "channel_data_res";
   const isChannelMessage = (event: MainSocketEvents): event is ChannelMessageRequest => event[0] === "channel_message_req";
@@ -37,6 +38,7 @@ const Main = () => {
   const isDeleteChannel = (event: MainSocketEvents): event is DeleteChannelRequest => event[0] === "delete_channel_req";
   const isJoinChannel = (event: MainSocketEvents): event is JoinChannelRequest => event[0] === "join_channel_req";
   const isLeaveChannel = (event: MainSocketEvents): event is LeaveChannelRequest => event[0] === "leave_channel_req";
+  const isBannedUsers = (event: MainSocketEvents): event is BannedUsersResponse => event[0] === "banned_users_res";
 
   const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
     share: true,
@@ -150,6 +152,9 @@ const Main = () => {
           setChannels(channels.filter(c => c !== event[1].channel));
         }
       }
+      else if (isBannedUsers(event)) {
+        setBannedUsers(event[1].users);
+      }
     },
     filter: m => {
       const event = JSON.parse(m.data);
@@ -165,7 +170,9 @@ const Main = () => {
         req_type === "remove_friend" ||
         req_type === "create_channel_req" ||
         req_type === "delete_channel_req" ||
-        req_type === "join_channel_req"
+        req_type === "join_channel_req" ||
+        req_type === "leave_channel_req" ||
+        req_type === "banned_users_res"
       );
     }
   });
@@ -248,15 +255,16 @@ const Main = () => {
     sendJsonMessage(banRequest);
   }
 
-  const onUnban = (user: string) => {
-    const banRequest: UnbanRequest = [
+  const onUnban = (user: string, channel: string) => {
+    setBannedUsers(bannedUsers.filter(u => u !== user));
+    const unbanRequest: UnbanRequest = [
       "unban_req",
       {
         user: user,
-        channel: selectedChannel
+        channel: channel
       }
     ];
-    sendJsonMessage(banRequest);
+    sendJsonMessage(unbanRequest);
   }
 
   const onSendFriendReq = (to: string) => {
@@ -363,6 +371,16 @@ const Main = () => {
     sendJsonMessage(leaveChannelRequest);
   }
 
+  const getBannedUsers = (channel: string) => {
+    const bannedUsersRequest: BannedUsersRequest = [
+      "banned_users_req",
+      {
+        channel: channel
+      }
+    ];
+    sendJsonMessage(bannedUsersRequest);
+  }
+
   return (
     <div className="flex flex-col h-screen">
       <Header 
@@ -380,12 +398,15 @@ const Main = () => {
             channels={channels}
             selected={selectedChannel}
             userType={USER_TYPE}
+            bannedUsers={bannedUsers}
             onSelect={onSelectChannel}
             onUnselect={onUnselect}
             onCreateChannel={onCreateChannel}
             onLeaveChannel={onLeaveChannel}
             onJoinChannel={onJoinChannel}
             onDeleteChannel={onDeleteChannel}
+            onUnban={onUnban}
+            getBannedUsers={getBannedUsers}
           />
           <Friends
             friends={new Set(friends)}

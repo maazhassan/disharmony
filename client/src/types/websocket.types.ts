@@ -203,6 +203,20 @@ export type UnblockRequest = [
   }
 ];
 
+export type BannedUsersRequest = [
+  "banned_users_req",
+  {
+    channel: string
+  }
+];
+
+export type BannedUsersResponse = [
+  "banned_users_res",
+  {
+    users: string[]
+  }
+];
+
 export type MainSocketEvents = 
   ChannelDataResponse | 
   ChannelMessageRequest |
@@ -215,4 +229,5 @@ export type MainSocketEvents =
   CreateChannelRequest |
   DeleteChannelRequest |
   JoinChannelRequest |
-  LeaveChannelRequest;
+  LeaveChannelRequest |
+  BannedUsersResponse;
