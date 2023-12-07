@@ -449,6 +449,7 @@ const Main = () => {
           selectedChannel={selectedChannel}
           selectedFriend={selectedFriend}
           username={username}
+          isMobile={false}
           onSendMessage={message => onSendMessage(message)}
         />
 
@@ -480,7 +481,7 @@ const Main = () => {
     <div style={{
       position: 'fixed',
       top: 0,
-      right: 0,
+      left: 0,
       width: '50%',
       height: '100%',
       overflow: 'auto',
@@ -492,7 +493,7 @@ const Main = () => {
         {isChannelsOpen && (
         <div>
           {channels.map((channel, index) => (
-          <div className = "channel" key={index}>{channel}</div>
+          <div className = "channel" key={index} onClick={() => onSelectChannel(channel)}>{channel}</div>
           ))}
         </div>
         )}
@@ -502,7 +503,7 @@ const Main = () => {
           {isFriendsOpen && (
         <div>
           {friends.map((friend, index) => (
-          <div className="friend" key={index}>{friend}</div>
+          <div className="friend" key={index} onClick={() => onSelectFriend(friend)}>{friend}</div>
           ))}
         </div>
         )}
@@ -533,13 +534,14 @@ const Main = () => {
     </div>
   )}
 
-    <div className="mobile-messages">
+    <div className="mobile-messages flex-grow" onClick={() => setIsOpen(false)}>
       <MessageWindow 
         selectedChannelMessages={selectedChannelMessages}
         selectedFriendMessages={selectedFriendMessages}
         selectedChannel={selectedChannel}
         selectedFriend={selectedFriend}
         username={username}
+        isMobile={true}
         onSendMessage={message => onSendMessage(message)}
       />
     </div>

@@ -15,6 +15,7 @@ type MessageWindowProps = {
   selectedChannel: string,
   selectedFriend: string,
   username: string,
+  isMobile: boolean,
   onSendMessage: (message: string) => void
 }
 
@@ -24,6 +25,7 @@ const MessageWindow = ({
   selectedChannel,
   selectedFriend,
   username,
+  isMobile,
   onSendMessage
 }: MessageWindowProps) => {
   const [text, setText] = useState("");
@@ -91,7 +93,7 @@ const MessageWindow = ({
   });
 
   return (
-    <div className="flex flex-col w-[70%] relative">
+    <div className={`flex flex-col ${isMobile ? "h-full" : "w-[70%]"} relative`}>
       <h2 className="general-channel-h2">
         {selectedChannel ? selectedChannel : selectedFriend || <span>&#8203;</span>}
       </h2>
@@ -99,7 +101,7 @@ const MessageWindow = ({
         {filterMessages()}
       </div>
       <div
-        className="bg-text-input-bg text-white focus:outline-none rounded max-h-36 w-[98%] px-2 overflow-auto whitespace-pre-wrap absolute bottom-6 left-0 right-0 mx-auto py-2"
+        className={`bg-text-input-bg text-white focus:outline-none rounded max-h-36 w-[98%] px-2 overflow-auto whitespace-pre-wrap absolute bottom-6 left-0 right-0 mx-auto py-2`}
         contentEditable={true}
         onInput={e => setText((e.target as HTMLElement).textContent || '')}
         ref={textAreaRef}
