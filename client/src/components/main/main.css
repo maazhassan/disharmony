@@ -72,3 +72,79 @@ body, html {
   height: 100%;
   /* overflow: hidden; */
 }
+
+/* delete this code later and put in mobileMain.css ---------------------------------------------------------------------------------------------------------------------------*/
+ 
+.unique-class {
+  display: none;
+}
+
+/* Mobile view ---------------------------------------------------------------------------------------------------------------------------------------- */
+  @media (max-width: 768px) {
+    .cols-box,
+    .text-channels-h2,
+    .general-channel-h2,
+    .users-channel-h2,
+    .disharmony-title,
+    .title-box,
+    .friends-icon {
+      display: none;
+    }
+    .unique-class {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+  
+    .mobile-header {
+      display: flex;  
+      align-items: center;
+      background-color: #635971;
+      padding: 1rem; 
+    }
+  
+    .channel-name {
+      font-size: 1.75rem; 
+      padding-left: 1rem;
+      color: white;
+    }
+
+    .triple-bar-icon {
+      font-size: 1.75rem; 
+      color: white;
+      font-weight: bold;
+    }
+
+    .dropdown-title {
+      display: inline-block;  
+      font-size: 1.75rem; 
+      padding-left: 2rem;
+      padding-bottom: 0.5rem;
+      padding-top: 1rem;
+      color: white;
+    }
+
+    .channel {
+      color: white;  
+      padding-top: 0.5rem;
+      padding-left: 3rem;  
+    }
+
+    .friend {
+      color: white;  
+      padding-top: 0.5rem;
+      padding-left: 3rem;  
+    }
+
+    .request {
+      color: white;  
+      padding-top: 0.5rem;
+      padding-left: 3rem;  
+    }
+
+    .user {
+      color: white;  
+      padding-top: 0.5rem;
+      padding-left: 3rem;  
+    }
+  }
