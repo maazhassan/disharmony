@@ -7,7 +7,7 @@ from pymongo.errors import DuplicateKeyError
 ADMIN_SET = set()
 USER_SET = set()
 CLIENTS = {}
-db = MongoClient().disharmony
+db = MongoClient("db", 27017).disharmony
 
 def error_event(type, message):
     return json.dumps([type, {"message": message}])
@@ -522,7 +522,7 @@ async def messages(websocket):
         await logout(username, websocket)
 
 async def main():
-    async with websockets.serve(messages, "localhost", 8000):
+    async with websockets.serve(messages, "0.0.0.0", 8000):
         await asyncio.Future()  # run forever
 
 asyncio.run(main())

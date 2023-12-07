@@ -11,7 +11,6 @@ type ContextType = {
   handleClickLogin: (u: string, p: string) => void,
   handleClickCreate: (u: string, p: string) => void
 }
-import MessageBoard from './MessageBoard';
 
 const App = () => {
   const [username, setName] = useState("");
@@ -47,7 +46,7 @@ const App = () => {
   const isData = (event: LoginResponse | RegisterResponse): event is LoginData => event[0] === "login_data";
   const isLoginError = (event: LoginError | RegisterResponse): event is LoginError => event[0] === "login_err";
 
-  const { sendJsonMessage, readyState } = useWebSocket(import.meta.env.VITE_WS_URL, {
+  const { sendJsonMessage, readyState } = useWebSocket("ws://localhost:8000", {
     share: true,
     onOpen: () => {
       console.log("Websocket connection established.");

@@ -65,7 +65,7 @@ const Main = () => {
   const isLeaveChannel = (event: MainSocketEvents): event is LeaveChannelRequest => event[0] === "leave_channel_req";
   const isBannedUsers = (event: MainSocketEvents): event is BannedUsersResponse => event[0] === "banned_users_res";
 
-  const { sendJsonMessage } = useWebSocket(import.meta.env.VITE_WS_URL, {
+  const { sendJsonMessage } = useWebSocket("ws://localhost:8000", {
     share: true,
     onMessage: m => {
       const event = JSON.parse(m.data);
@@ -547,17 +547,6 @@ const Main = () => {
     </div>
     </div>
     </div>
-    // <div className="flex flex-row gap-6">
-    //   <UserList
-    //     users={users.filter(user => user !== username)}
-    //     onSelect={name => onSelect(name)}
-    //     selected={selected}
-    //   />
-    //   <MessageWindow 
-    //     name={username}
-    //     selected={selected}
-    //   />
-    // </div>
   );
 }
 
