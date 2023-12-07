@@ -66,6 +66,7 @@ const MessageWindow = ({
             name={message.from}
             message={message.message}
             className={`m-4 p-3 ${message.from === username ? "ml-auto" : ""}`}
+            isMobile={isMobile}
           />
         )
       )
@@ -78,6 +79,7 @@ const MessageWindow = ({
             name={message.from}
             message={message.message}
             className={`m-4 p-3 ${message.from === username ? "ml-auto" : ""}`}
+            isMobile={isMobile}
           />
         )
       )
