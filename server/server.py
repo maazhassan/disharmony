@@ -485,10 +485,16 @@ async def messages(websocket):
             continue
 
         if req_type == "kick_req":
+            if websocket not in ADMIN_SET:
+                continue
+            
             remove_user_from_channel(req_body["user"], req_body["channel"])
             continue
 
         if req_type == "ban_req":
+            if websocket not in ADMIN_SET:
+                continue
+            
             remove_user_from_channel(req_body["user"], req_body["channel"])
 
             # Add user to channel's banned list
@@ -499,6 +505,9 @@ async def messages(websocket):
             continue
         
         if req_type == "unban_req":
+            if websocket not in ADMIN_SET:
+                continue
+            
             # Remove user from channel's banned list
             db.channels.update_one(
                 {"name": req_body["channel"]},
@@ -507,6 +516,9 @@ async def messages(websocket):
             continue
 
         if req_type == "banned_users_req":
+            if websocket not in ADMIN_SET:
+                continue
+            
             b_chan = db.channels.find_one({"name": req_body["channel"]}, ["banned"])
             if b_chan and b_chan.get("banned"):
                 banned_users = b_chan.get("banned")
