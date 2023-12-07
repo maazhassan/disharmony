@@ -11,6 +11,7 @@ type ContextType = {
   handleClickLogin: (u: string, p: string) => void,
   handleClickCreate: (u: string, p: string) => void
 }
+import MessageBoard from './MessageBoard';
 
 const App = () => {
   const [username, setName] = useState("");

@@ -148,12 +148,12 @@ getBannedUsers
       <ReactModal
         isOpen={hmodalIsOpen}
         onRequestClose={closeHModal}
-        className={"fixed w-72 h-32 bg-bg-color rounded-md outline-none top-20 left-48"}
+        className={"flex flex-row justify-center fixed w-80 h-20 bg-bg-color rounded-md outline-none top-20 left-48 pr-4"}
         overlayClassName={"fixed top-0 left-0 right-0 bottom-0 bg-white/10"}
       >
         <div className="flex flex-row gap-2 mt-4 ml-4">
           <input
-            className="bg-text-input-bg focus:outline-none rounded text-white py-1 px-1 placeholder:text-gray-200"
+            className="bg-text-input-bg focus:outline-none rounded text-white py-1 px-1 placeholder:text-gray-200 w-30 h-10"
             placeholder="Name..."
             onKeyDown={e => onKeyDown(e)}
             onChange={e => onChange(e)}
@@ -161,18 +161,17 @@ getBannedUsers
             autoFocus={true}
           />
           <button
-            className="py-1 px-2 bg-[#77E688] text-white border-none rounded font-semibold hover:cursor-pointer"
+            className="bg-[#77E688] text-white border-none rounded font-semibold hover:cursor-pointer h-10 w-14 mr-5"
             onClick={onSubmitHModal}
           >
             Go
           </button>
         </div>
-        <button
-          className="absolute bottom-3 right-0 left-0 w-fit mx-auto py-1 px-8 bg-app-pink text-white border-none rounded font-semibold hover:cursor-pointer"
-          onClick={closeHModal}
-        >
-          Close
-        </button>
+        <FontAwesomeIcon
+            icon={faSquareXmark}
+            className="text-app-pink py-1 pt-3.5 h-5 hover:cursor-pointer"
+            onClick={closeHModal}
+          />
       </ReactModal>
       <ReactModal
         isOpen={cmodalIsOpen}
