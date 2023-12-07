@@ -3,6 +3,7 @@ import { MessageBase } from "../../../types/websocket.types";
 // import useWebSocket from "react-use-websocket";
 import useResizeObserver from "@react-hook/resize-observer";
 import MessageBubble from "./MessageBubble";
+import axios from "axios";
 
 export interface MessageWindowPropsOLD {
   name: string,
@@ -90,12 +91,43 @@ const MessageWindow = ({
     displayRef.current.style.height = `${window.innerHeight - top - (size+30)}px`
   });
 
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+
+    if (!e.dataTransfer) {
+      return;
+    }
+
+    const files = Array.from(e.dataTransfer.files).filter((file) =>
+      file.type.startsWith('image/')
+    );
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await axios.post('https://api.imgur.com/3/image', formData, {
+        headers: {
+          Authorization: 'Client-ID 94fa5aa96281120',
+        },
+      });
+
+      const link = response.data.data.link;
+      onSendMessage(link);
+    }
+  };
+
   return (
     <div className="flex flex-col w-[70%] relative">
       <h2 className="general-channel-h2">
         {selectedChannel ? selectedChannel : selectedFriend || <span>&#8203;</span>}
       </h2>
-      <div className="w-full overflow-auto" id="lol" ref={displayRef}>
+      <div
+        className="w-full overflow-auto"
+        ref={displayRef}
+        onDragOver={e => e.preventDefault()}
+        onDrop={e => handleDrop(e)}
+      >
         {filterMessages()}
       </div>
       <div
